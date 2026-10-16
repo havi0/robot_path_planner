@@ -1,0 +1,290 @@
+{
+  "id": "reference-dqn",
+  "name": "Reference DQN (report model)",
+  "algorithm": "dqn",
+  "hyperparameters": {
+    "hidden": [
+      128,
+      128
+    ],
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "buffer_size": 200000,
+    "learning_starts": 5000,
+    "train_freq": 1,
+    "target_update_interval": 2000,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_steps": 100000,
+    "double_dqn": true,
+    "grad_clip": 10.0
+  },
+  "environment": {
+    "world": {
+      "width": 6.0,
+      "height": 6.0,
+      "obstacle_density": 0.15,
+      "obstacle_size": [
+        0.3,
+        1.0
+      ],
+      "goal_radius": 0.3,
+      "min_start_goal_dist": 2.5,
+      "start_goal_clearance": 0.35,
+      "num_moving_obstacles": 0,
+      "moving_obstacle_radius": 0.2,
+      "moving_obstacle_speed": 0.2
+    },
+    "randomization": {
+      "enabled": true,
+      "obstacle_density": [
+        0.05,
+        0.25
+      ],
+      "linear_scale": [
+        0.9,
+        1.1
+      ],
+      "angular_scale": [
+        0.9,
+        1.1
+      ],
+      "motion_noise_std": 0.05,
+      "sensor_noise_std": [
+        0.0,
+        0.03
+      ],
+      "sensor_dropout_prob": [
+        0.0,
+        0.02
+      ]
+    },
+    "reward": {
+      "goal": 10.0,
+      "collision": -10.0,
+      "step": -0.05,
+      "progress_scale": 1.0,
+      "stop_penalty": -0.5,
+      "turn_reversal_penalty": -0.1,
+      "proximity_threshold": 0.35,
+      "proximity_penalty": -0.05,
+      "safety_intervention": -0.1
+    }
+  },
+  "seed": 0,
+  "status": "completed",
+  "created_at": 1792084635.0013914,
+  "started_at": null,
+  "finished_at": 1792085213.6714218,
+  "duration_s": null,
+  "episodes": 2659,
+  "total_steps": 249989,
+  "evaluations": [
+    {
+      "kind": "validation",
+      "total_steps": 10000,
+      "episodes": 100,
+      "success_rate": 0.21,
+      "collision_rate": 0.74,
+      "timeout_rate": 0.05
+    },
+    {
+      "kind": "validation",
+      "total_steps": 20000,
+      "episodes": 100,
+      "success_rate": 0.56,
+      "collision_rate": 0.42,
+      "timeout_rate": 0.02
+    },
+    {
+      "kind": "validation",
+      "total_steps": 30000,
+      "episodes": 100,
+      "success_rate": 0.49,
+      "collision_rate": 0.47,
+      "timeout_rate": 0.04
+    },
+    {
+      "kind": "validation",
+      "total_steps": 40000,
+      "episodes": 100,
+      "success_rate": 0.55,
+      "collision_rate": 0.33,
+      "timeout_rate": 0.12
+    },
+    {
+      "kind": "validation",
+      "total_steps": 50000,
+      "episodes": 100,
+      "success_rate": 0.64,
+      "collision_rate": 0.27,
+      "timeout_rate": 0.09
+    },
+    {
+      "kind": "validation",
+      "total_steps": 60000,
+      "episodes": 100,
+      "success_rate": 0.79,
+      "collision_rate": 0.16,
+      "timeout_rate": 0.05
+    },
+    {
+      "kind": "validation",
+      "total_steps": 70000,
+      "episodes": 100,
+      "success_rate": 0.77,
+      "collision_rate": 0.08,
+      "timeout_rate": 0.15
+    },
+    {
+      "kind": "validation",
+      "total_steps": 80000,
+      "episodes": 100,
+      "success_rate": 0.81,
+      "collision_rate": 0.07,
+      "timeout_rate": 0.12
+    },
+    {
+      "kind": "validation",
+      "total_steps": 90000,
+      "episodes": 100,
+      "success_rate": 0.81,
+      "collision_rate": 0.1,
+      "timeout_rate": 0.09
+    },
+    {
+      "kind": "validation",
+      "total_steps": 100000,
+      "episodes": 100,
+      "success_rate": 0.71,
+      "collision_rate": 0.09,
+      "timeout_rate": 0.2
+    },
+    {
+      "kind": "validation",
+      "total_steps": 110000,
+      "episodes": 100,
+      "success_rate": 0.79,
+      "collision_rate": 0.09,
+      "timeout_rate": 0.12
+    },
+    {
+      "kind": "validation",
+      "total_steps": 120000,
+      "episodes": 100,
+      "success_rate": 0.82,
+      "collision_rate": 0.12,
+      "timeout_rate": 0.06
+    },
+    {
+      "kind": "validation",
+      "total_steps": 130000,
+      "episodes": 100,
+      "success_rate": 0.76,
+      "collision_rate": 0.19,
+      "timeout_rate": 0.05
+    },
+    {
+      "kind": "validation",
+      "total_steps": 140000,
+      "episodes": 100,
+      "success_rate": 0.71,
+      "collision_rate": 0.2,
+      "timeout_rate": 0.09
+    },
+    {
+      "kind": "validation",
+      "total_steps": 150000,
+      "episodes": 100,
+      "success_rate": 0.67,
+      "collision_rate": 0.21,
+      "timeout_rate": 0.12
+    },
+    {
+      "kind": "validation",
+      "total_steps": 160000,
+      "episodes": 100,
+      "success_rate": 0.69,
+      "collision_rate": 0.13,
+      "timeout_rate": 0.18
+    },
+    {
+      "kind": "validation",
+      "total_steps": 170000,
+      "episodes": 100,
+      "success_rate": 0.7,
+      "collision_rate": 0.11,
+      "timeout_rate": 0.19
+    },
+    {
+      "kind": "validation",
+      "total_steps": 180000,
+      "episodes": 100,
+      "success_rate": 0.68,
+      "collision_rate": 0.08,
+      "timeout_rate": 0.24
+    },
+    {
+      "kind": "validation",
+      "total_steps": 190000,
+      "episodes": 100,
+      "success_rate": 0.52,
+      "collision_rate": 0.11,
+      "timeout_rate": 0.37
+    },
+    {
+      "kind": "validation",
+      "total_steps": 200000,
+      "episodes": 100,
+      "success_rate": 0.29,
+      "collision_rate": 0.17,
+      "timeout_rate": 0.54
+    },
+    {
+      "kind": "validation",
+      "total_steps": 210000,
+      "episodes": 100,
+      "success_rate": 0.4,
+      "collision_rate": 0.26,
+      "timeout_rate": 0.34
+    },
+    {
+      "kind": "validation",
+      "total_steps": 220000,
+      "episodes": 100,
+      "success_rate": 0.58,
+      "collision_rate": 0.14,
+      "timeout_rate": 0.28
+    },
+    {
+      "kind": "validation",
+      "total_steps": 230000,
+      "episodes": 100,
+      "success_rate": 0.56,
+      "collision_rate": 0.22,
+      "timeout_rate": 0.22
+    },
+    {
+      "kind": "validation",
+      "total_steps": 240000,
+      "episodes": 100,
+      "success_rate": 0.38,
+      "collision_rate": 0.27,
+      "timeout_rate": 0.35
+    },
+    {
+      "kind": "validation",
+      "total_steps": 250000,
+      "episodes": 100,
+      "success_rate": 0.41,
+      "collision_rate": 0.24,
+      "timeout_rate": 0.35
+    }
+  ],
+  "imported": true,
+  "checkpoint_paths": [
+    "C:\\Users\\vhavi\\rl-robot-path-planning\\models\\dqn.pt"
+  ],
+  "notes": "Imported from runs\\final\\B (trained with the CLI)."
+}

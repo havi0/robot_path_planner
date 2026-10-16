@@ -1,0 +1,167 @@
+{
+  "per_seed": {
+    "old reward": [
+      {
+        "model": "models/dqn.pt",
+        "success": 59,
+        "collision": 15,
+        "timeout": 16,
+        "n": 90,
+        "causes": {
+          "clipped an obstacle beside the robot": 10,
+          "drove into an obstacle ahead": 3,
+          "hit by / drove into a moving obstacle": 2
+        }
+      },
+      {
+        "model": "runs/fix/old_s1/best.pt",
+        "success": 56,
+        "collision": 19,
+        "timeout": 15,
+        "n": 90,
+        "causes": {
+          "clipped an obstacle beside the robot": 14,
+          "clipped an obstacle beside the robot (not measured by any beam: between-beam gap)": 1,
+          "drove into an obstacle ahead": 2,
+          "hit by / drove into a moving obstacle": 2
+        }
+      },
+      {
+        "model": "runs/fix/old_s2/best.pt",
+        "success": 71,
+        "collision": 11,
+        "timeout": 8,
+        "n": 90,
+        "causes": {
+          "clipped an obstacle beside the robot": 8,
+          "hit by / drove into a moving obstacle": 1,
+          "drove into an obstacle ahead": 2
+        }
+      }
+    ],
+    "new reward": [
+      {
+        "model": "runs/fix/new_s0/best.pt",
+        "success": 62,
+        "collision": 16,
+        "timeout": 12,
+        "n": 90,
+        "causes": {
+          "clipped an obstacle beside the robot": 8,
+          "drove into an obstacle ahead": 5,
+          "hit by / drove into a moving obstacle": 3
+        }
+      },
+      {
+        "model": "runs/fix/new_s1/best.pt",
+        "success": 65,
+        "collision": 12,
+        "timeout": 13,
+        "n": 90,
+        "causes": {
+          "clipped an obstacle beside the robot": 10,
+          "drove into an obstacle ahead (not measured by any beam: between-beam gap)": 1,
+          "drove into an obstacle ahead": 1
+        }
+      },
+      {
+        "model": "runs/fix/new_s2/best.pt",
+        "success": 50,
+        "collision": 15,
+        "timeout": 25,
+        "n": 90,
+        "causes": {
+          "drove into an obstacle ahead": 1,
+          "clipped an obstacle beside the robot": 12,
+          "hit by / drove into a moving obstacle": 2
+        }
+      }
+    ]
+  },
+  "summary": {
+    "old reward": {
+      "success": {
+        "pooled": 0.6888888888888889,
+        "ci": [
+          0.6313424777236367,
+          0.7411356264066342
+        ],
+        "per_seed": [
+          0.6555555555555556,
+          0.6222222222222222,
+          0.7888888888888889
+        ]
+      },
+      "collision": {
+        "pooled": 0.16666666666666666,
+        "ci": [
+          0.1269550569072336,
+          0.21573064168640596
+        ],
+        "per_seed": [
+          0.16666666666666666,
+          0.2111111111111111,
+          0.12222222222222222
+        ]
+      },
+      "timeout": {
+        "pooled": 0.14444444444444443,
+        "ci": [
+          0.10749753218462643,
+          0.19136721298192239
+        ],
+        "per_seed": [
+          0.17777777777777778,
+          0.16666666666666666,
+          0.08888888888888889
+        ]
+      },
+      "n": 270
+    },
+    "new reward": {
+      "success": {
+        "pooled": 0.6555555555555556,
+        "ci": [
+          0.5970488944329742,
+          0.7096977795566608
+        ],
+        "per_seed": [
+          0.6888888888888889,
+          0.7222222222222222,
+          0.5555555555555556
+        ]
+      },
+      "collision": {
+        "pooled": 0.15925925925925927,
+        "ci": [
+          0.12043646446567466,
+          0.207642249652268
+        ],
+        "per_seed": [
+          0.17777777777777778,
+          0.13333333333333333,
+          0.16666666666666666
+        ]
+      },
+      "timeout": {
+        "pooled": 0.18518518518518517,
+        "ci": [
+          0.14338150813449474,
+          0.23582165164838703
+        ],
+        "per_seed": [
+          0.13333333333333333,
+          0.14444444444444443,
+          0.2777777777777778
+        ]
+      },
+      "n": 270
+    }
+  },
+  "welch_p": {
+    "success": 0.6674921808326479,
+    "collision": 0.8144014606911257,
+    "timeout": 0.5023566088118101
+  },
+  "time": 1792109692.1780486
+}

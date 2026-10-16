@@ -1,0 +1,5 @@
+__pycache__/
+data/logs/
+studio/node_modules/
+studio/dist/
+runs/live_*/

@@ -1,0 +1,961 @@
+[
+ {
+  "model_id": "m-9800d279c6",
+  "label": "Reference Q-learning (report model) / qlearning.pt",
+  "algorithm": "qlearning",
+  "architecture": {
+   "type": "Tabular Q",
+   "states": 648,
+   "n_actions": 4
+  },
+  "interface": {
+   "sensor": {
+    "num_beams": 24,
+    "fov_deg": 360,
+    "max_range": 3.0
+   },
+   "actions": {
+    "forward": [
+     0.3,
+     0.0
+    ],
+    "turn_left": [
+     0.0,
+     1.2
+    ],
+    "turn_right": [
+     0.0,
+     -1.2
+    ],
+    "stop": [
+     0.0,
+     0.0
+    ]
+   },
+   "robot": {
+    "radius": 0.15,
+    "control_dt": 0.25
+   },
+   "observation": "ranges/max_range + goal(dist,sin,cos) + last(v,w)",
+   "sim_version": "nexus-sim-2"
+  },
+  "env_version": "env-12fbdbd8",
+  "training_config": {
+   "hyperparameters": {
+    "alpha": 0.1,
+    "gamma": 0.99,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_episodes": 4000,
+    "episodes": 6000
+   },
+   "reward": {
+    "goal": 10.0,
+    "collision": -10.0,
+    "step": -0.05,
+    "progress_scale": 1.0,
+    "stop_penalty": -0.5,
+    "turn_reversal_penalty": -0.1,
+    "proximity_threshold": 0.35,
+    "proximity_penalty": -0.05,
+    "safety_intervention": -0.1
+   },
+   "randomization": {
+    "enabled": true,
+    "obstacle_density": [
+     0.05,
+     0.25
+    ],
+    "linear_scale": [
+     0.9,
+     1.1
+    ],
+    "angular_scale": [
+     0.9,
+     1.1
+    ],
+    "motion_noise_std": 0.05,
+    "sensor_noise_std": [
+     0.0,
+     0.03
+    ],
+    "sensor_dropout_prob": [
+     0.0,
+     0.02
+    ]
+   },
+   "world": {
+    "width": 6.0,
+    "height": 6.0,
+    "obstacle_density": 0.15,
+    "obstacle_size": [
+     0.3,
+     1.0
+    ],
+    "goal_radius": 0.3,
+    "min_start_goal_dist": 2.5,
+    "start_goal_clearance": 0.35,
+    "num_moving_obstacles": 0,
+    "moving_obstacle_radius": 0.2,
+    "moving_obstacle_speed": 0.2
+   }
+  },
+  "seed": 0,
+  "experiment_id": "reference-qlearning",
+  "checkpoint": "C:\\Users\\vhavi\\rl-robot-path-planning\\models\\qlearning.pt",
+  "checkpoint_name": "qlearning.pt",
+  "checkpoint_mtime": 1792085213.690455,
+  "training": {
+   "episodes": 6000,
+   "total_steps": 952272,
+   "duration_s": null,
+   "best_validation_success": 0.39,
+   "checkpoint_eval": {
+    "episodes": 100,
+    "success_rate": 0.39,
+    "success_ci_low": 0.300167219319702,
+    "success_ci_high": 0.48797163832501844,
+    "collision_rate": 0.02,
+    "timeout_rate": 0.59,
+    "no_path_rate": 0.0,
+    "mean_steps_success": 60.8974358974359,
+    "mean_path_length_success": 3.8019230769230776,
+    "mean_path_ratio_success": 1.1371285349000109,
+    "mean_inference_ms": 0.042435106615708665,
+    "mean_planning_ms": 0.0,
+    "mean_nodes_expanded": 0.0,
+    "interventions_per_episode": 0.0
+   }
+  },
+  "created": 1792085213.690455,
+  "registered": 1792104339.3181899,
+  "benchmarks": [
+   {
+    "run_id": "run-20261016041550-reference-models-on-shar-6920",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "qlearning",
+    "time": 1792104369.8706236,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": false
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.3111111111111111,
+      "k": 28,
+      "n": 90,
+      "ci_low": 0.22485715147181132,
+      "ci_high": 0.4128301854874903
+     },
+     "collision": {
+      "rate": 0.07777777777777778,
+      "k": 7,
+      "n": 90,
+      "ci_low": 0.03818432959772764,
+      "ci_high": 0.15194030595835836
+     },
+     "timeout": {
+      "rate": 0.6111111111111112,
+      "k": 55,
+      "n": 90,
+      "ci_low": 0.5078226845453937,
+      "ci_high": 0.7053024113608994
+     },
+     "path_ratio": {
+      "mean": 1.2194357142857142,
+      "n": 28,
+      "ci_low": 1.1292591903950029,
+      "ci_high": 1.3096122381764255,
+      "std": 0.2325578593307651
+     }
+    }
+   }
+  ]
+ },
+ {
+  "model_id": "m-cb207c6335",
+  "label": "Reference DQN (report model) / dqn.pt",
+  "algorithm": "dqn",
+  "architecture": {
+   "type": "MLP Q-network",
+   "hidden": [
+    128,
+    128
+   ],
+   "obs_dim": 29,
+   "n_actions": 4,
+   "double_dqn": true,
+   "parameters": 20868
+  },
+  "interface": {
+   "sensor": {
+    "num_beams": 24,
+    "fov_deg": 360,
+    "max_range": 3.0
+   },
+   "actions": {
+    "forward": [
+     0.3,
+     0.0
+    ],
+    "turn_left": [
+     0.0,
+     1.2
+    ],
+    "turn_right": [
+     0.0,
+     -1.2
+    ],
+    "stop": [
+     0.0,
+     0.0
+    ]
+   },
+   "robot": {
+    "radius": 0.15,
+    "control_dt": 0.25
+   },
+   "observation": "ranges/max_range + goal(dist,sin,cos) + last(v,w)",
+   "sim_version": "nexus-sim-2"
+  },
+  "env_version": "env-12fbdbd8",
+  "training_config": {
+   "hyperparameters": {
+    "hidden": [
+     128,
+     128
+    ],
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "buffer_size": 200000,
+    "learning_starts": 5000,
+    "train_freq": 1,
+    "target_update_interval": 2000,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_steps": 100000,
+    "double_dqn": true,
+    "grad_clip": 10.0
+   },
+   "reward": {
+    "goal": 10.0,
+    "collision": -10.0,
+    "step": -0.05,
+    "progress_scale": 1.0,
+    "stop_penalty": -0.5,
+    "turn_reversal_penalty": -0.1,
+    "proximity_threshold": 0.35,
+    "proximity_penalty": -0.05,
+    "safety_intervention": -0.1
+   },
+   "randomization": {
+    "enabled": true,
+    "obstacle_density": [
+     0.05,
+     0.25
+    ],
+    "linear_scale": [
+     0.9,
+     1.1
+    ],
+    "angular_scale": [
+     0.9,
+     1.1
+    ],
+    "motion_noise_std": 0.05,
+    "sensor_noise_std": [
+     0.0,
+     0.03
+    ],
+    "sensor_dropout_prob": [
+     0.0,
+     0.02
+    ]
+   },
+   "world": {
+    "width": 6.0,
+    "height": 6.0,
+    "obstacle_density": 0.15,
+    "obstacle_size": [
+     0.3,
+     1.0
+    ],
+    "goal_radius": 0.3,
+    "min_start_goal_dist": 2.5,
+    "start_goal_clearance": 0.35,
+    "num_moving_obstacles": 0,
+    "moving_obstacle_radius": 0.2,
+    "moving_obstacle_speed": 0.2
+   }
+  },
+  "seed": 0,
+  "experiment_id": "reference-dqn",
+  "checkpoint": "C:\\Users\\vhavi\\rl-robot-path-planning\\models\\dqn.pt",
+  "checkpoint_name": "dqn.pt",
+  "checkpoint_mtime": 1792085213.6714218,
+  "training": {
+   "episodes": 2659,
+   "total_steps": 120000,
+   "duration_s": null,
+   "best_validation_success": 0.82,
+   "checkpoint_eval": {
+    "episodes": 100,
+    "success_rate": 0.82,
+    "success_ci_low": 0.7333246397578691,
+    "success_ci_high": 0.8829986834574896,
+    "collision_rate": 0.12,
+    "timeout_rate": 0.06,
+    "no_path_rate": 0.0,
+    "mean_steps_success": 69.1219512195122,
+    "mean_path_length_success": 4.273170731707316,
+    "mean_path_ratio_success": 1.1499128267679684,
+    "mean_inference_ms": 0.06251415851798627,
+    "mean_planning_ms": 0.0,
+    "mean_nodes_expanded": 0.0,
+    "interventions_per_episode": 0.0
+   }
+  },
+  "created": 1792085213.6714218,
+  "registered": 1792104339.322885,
+  "benchmarks": [
+   {
+    "run_id": "run-20261016041550-reference-models-on-shar-6920",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn_recovery",
+    "time": 1792104356.630194,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": false
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.6666666666666666,
+      "k": 60,
+      "n": 90,
+      "ci_low": 0.5642212433918371,
+      "ci_high": 0.7554664004676025
+     },
+     "collision": {
+      "rate": 0.15555555555555556,
+      "k": 14,
+      "n": 90,
+      "ci_low": 0.09498189002638328,
+      "ci_high": 0.24433031266410787
+     },
+     "timeout": {
+      "rate": 0.17777777777777778,
+      "k": 16,
+      "n": 90,
+      "ci_low": 0.11249641451153418,
+      "ci_high": 0.26944080736021564
+     },
+     "path_ratio": {
+      "mean": 1.181998333333333,
+      "n": 60,
+      "ci_low": 1.115620706132497,
+      "ci_high": 1.248375960534169,
+      "std": 0.25695156273195824
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016041550-reference-models-on-shar-6920",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn",
+    "time": 1792104362.2695153,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": false
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.6555555555555556,
+      "k": 59,
+      "n": 90,
+      "ci_low": 0.55283279348344,
+      "ci_high": 0.7455423407853703
+     },
+     "collision": {
+      "rate": 0.16666666666666666,
+      "k": 15,
+      "n": 90,
+      "ci_low": 0.10368397504925966,
+      "ci_high": 0.25694073723186084
+     },
+     "timeout": {
+      "rate": 0.17777777777777778,
+      "k": 16,
+      "n": 90,
+      "ci_low": 0.11249641451153418,
+      "ci_high": 0.26944080736021564
+     },
+     "path_ratio": {
+      "mean": 1.1837762711864406,
+      "n": 59,
+      "ci_low": 1.1110957622358313,
+      "ci_high": 1.2564567801370499,
+      "std": 0.2788952920183383
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016054542-deployed-config-shield-o-097a",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn_recovery",
+    "time": 1792109749.6206157,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": true
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.7888888888888889,
+      "k": 71,
+      "n": 90,
+      "ci_low": 0.6936500878323096,
+      "ci_high": 0.8604751615240526
+     },
+     "collision": {
+      "rate": 0.022222222222222223,
+      "k": 2,
+      "n": 90,
+      "ci_low": 0.006115313794863603,
+      "ci_high": 0.07744677380807581
+     },
+     "timeout": {
+      "rate": 0.18888888888888888,
+      "k": 17,
+      "n": 90,
+      "ci_low": 0.1214115980938824,
+      "ci_high": 0.28183813336849667
+     },
+     "path_ratio": {
+      "mean": 1.2107676056338028,
+      "n": 71,
+      "ci_low": 1.1445800847231118,
+      "ci_high": 1.2769551265444938,
+      "std": 0.27963075948453775
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016054542-deployed-config-shield-o-097a",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn",
+    "time": 1792109757.546973,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": true
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.6777777777777778,
+      "k": 61,
+      "n": 90,
+      "ci_low": 0.5756664407220551,
+      "ci_high": 0.765333712728014
+     },
+     "collision": {
+      "rate": 0.044444444444444446,
+      "k": 4,
+      "n": 90,
+      "ci_low": 0.01741696001324882,
+      "ci_high": 0.1087701467709492
+     },
+     "timeout": {
+      "rate": 0.2777777777777778,
+      "k": 25,
+      "n": 90,
+      "ci_low": 0.1957955914762625,
+      "ci_high": 0.37795421671115115
+     },
+     "path_ratio": {
+      "mean": 1.19752131147541,
+      "n": 61,
+      "ci_low": 1.1310455208140395,
+      "ci_high": 1.2639971021367804,
+      "std": 0.2595576102491533
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016054905-deployed-config-dense-sa-58e8",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn_recovery",
+    "time": 1792109955.9830284,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": true
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.6888888888888889,
+      "k": 62,
+      "n": 90,
+      "ci_low": 0.5871698145125097,
+      "ci_high": 0.7751428485281886
+     },
+     "collision": {
+      "rate": 0.0,
+      "k": 0,
+      "n": 90,
+      "ci_low": 0.0,
+      "ci_high": 0.04093706842168078
+     },
+     "timeout": {
+      "rate": 0.3111111111111111,
+      "k": 28,
+      "n": 90,
+      "ci_low": 0.22485715147181132,
+      "ci_high": 0.4128301854874903
+     },
+     "path_ratio": {
+      "mean": 1.3001500000000001,
+      "n": 62,
+      "ci_low": 1.1874170908131265,
+      "ci_high": 1.4128829091868738,
+      "std": 0.4439134551415824
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016054905-deployed-config-dense-sa-58e8",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn",
+    "time": 1792109970.9260569,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": true
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.35555555555555557,
+      "k": 32,
+      "n": 90,
+      "ci_low": 0.2644371816701689,
+      "ci_high": 0.4585001936516499
+     },
+     "collision": {
+      "rate": 0.03333333333333333,
+      "k": 3,
+      "n": 90,
+      "ci_low": 0.011400183632439498,
+      "ci_high": 0.09347441356112923
+     },
+     "timeout": {
+      "rate": 0.6111111111111112,
+      "k": 55,
+      "n": 90,
+      "ci_low": 0.5078226845453937,
+      "ci_high": 0.7053024113608994
+     },
+     "path_ratio": {
+      "mean": 1.20381875,
+      "n": 32,
+      "ci_low": 1.1272622498852685,
+      "ci_high": 1.2803752501147314,
+      "std": 0.21233935170443105
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016055038-final-dense-safety-scan--36ef",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn_recovery",
+    "time": 1792110048.284269,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": true
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.7777777777777778,
+      "k": 70,
+      "n": 90,
+      "ci_low": 0.6815249725824009,
+      "ci_high": 0.8512877671833321
+     },
+     "collision": {
+      "rate": 0.022222222222222223,
+      "k": 2,
+      "n": 90,
+      "ci_low": 0.006115313794863603,
+      "ci_high": 0.07744677380807581
+     },
+     "timeout": {
+      "rate": 0.2,
+      "k": 18,
+      "n": 90,
+      "ci_low": 0.130422969625965,
+      "ci_high": 0.29413927142704344
+     },
+     "path_ratio": {
+      "mean": 1.260137142857143,
+      "n": 70,
+      "ci_low": 1.1805143719913216,
+      "ci_high": 1.3397599137229645,
+      "std": 0.33392988640610877
+     }
+    }
+   },
+   {
+    "run_id": "run-20261016055038-final-dense-safety-scan--36ef",
+    "set_id": "benchmark-v1",
+    "set_name": "NEXUS benchmark v1",
+    "policy": "dqn",
+    "time": 1792110060.918409,
+    "repeats": 2,
+    "conditions": {
+     "sensor_noise": 0.02,
+     "motion_noise": 0.05,
+     "shield": true
+    },
+    "summary": {
+     "episodes": 90,
+     "success": {
+      "rate": 0.4777777777777778,
+      "k": 43,
+      "n": 90,
+      "ci_low": 0.37761880660358116,
+      "ci_high": 0.5797561742151601
+     },
+     "collision": {
+      "rate": 0.022222222222222223,
+      "k": 2,
+      "n": 90,
+      "ci_low": 0.006115313794863603,
+      "ci_high": 0.07744677380807581
+     },
+     "timeout": {
+      "rate": 0.5,
+      "k": 45,
+      "n": 90,
+      "ci_low": 0.39883544540986604,
+      "ci_high": 0.601164554590134
+     },
+     "path_ratio": {
+      "mean": 1.2335372093023256,
+      "n": 43,
+      "ci_low": 1.1459711692419128,
+      "ci_high": 1.3211032493627384,
+      "std": 0.28453205026872075
+     }
+    }
+   }
+  ]
+ },
+ {
+  "model_id": "m-997f3b722b",
+  "label": "Studio demo DQN / best.pt",
+  "algorithm": "dqn",
+  "architecture": {
+   "type": "MLP Q-network",
+   "hidden": [
+    128,
+    128
+   ],
+   "obs_dim": 29,
+   "n_actions": 4,
+   "double_dqn": true,
+   "parameters": 20868
+  },
+  "interface": {
+   "sensor": {
+    "num_beams": 24,
+    "fov_deg": 360,
+    "max_range": 3.0
+   },
+   "actions": {
+    "forward": [
+     0.3,
+     0.0
+    ],
+    "turn_left": [
+     0.0,
+     1.2
+    ],
+    "turn_right": [
+     0.0,
+     -1.2
+    ],
+    "stop": [
+     0.0,
+     0.0
+    ]
+   },
+   "robot": {
+    "radius": 0.15,
+    "control_dt": 0.25
+   },
+   "observation": "ranges/max_range + goal(dist,sin,cos) + last(v,w)",
+   "sim_version": "nexus-sim-2"
+  },
+  "env_version": "env-12fbdbd8",
+  "training_config": {
+   "hyperparameters": {
+    "hidden": [
+     128,
+     128
+    ],
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "buffer_size": 200000,
+    "learning_starts": 5000,
+    "train_freq": 1,
+    "target_update_interval": 2000,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_steps": 100000,
+    "double_dqn": true,
+    "grad_clip": 10.0
+   },
+   "reward": {
+    "goal": 10.0,
+    "collision": -10.0,
+    "step": -0.05,
+    "progress_scale": 1.0,
+    "stop_penalty": -0.5,
+    "turn_reversal_penalty": -0.1,
+    "proximity_threshold": 0.35,
+    "proximity_penalty": -0.05,
+    "safety_intervention": -0.1
+   },
+   "randomization": {
+    "enabled": true,
+    "obstacle_density": [
+     0.05,
+     0.25
+    ],
+    "linear_scale": [
+     0.9,
+     1.1
+    ],
+    "angular_scale": [
+     0.9,
+     1.1
+    ],
+    "motion_noise_std": 0.05,
+    "sensor_noise_std": [
+     0.0,
+     0.03
+    ],
+    "sensor_dropout_prob": [
+     0.0,
+     0.02
+    ]
+   },
+   "world": {
+    "width": 6.0,
+    "height": 6.0,
+    "obstacle_density": 0.15,
+    "obstacle_size": [
+     0.3,
+     1.0
+    ],
+    "goal_radius": 0.3,
+    "min_start_goal_dist": 2.5,
+    "start_goal_clearance": 0.35,
+    "num_moving_obstacles": 0,
+    "moving_obstacle_radius": 0.2,
+    "moving_obstacle_speed": 0.2
+   }
+  },
+  "seed": 0,
+  "experiment_id": "20261016-032234-studio-demo-dqn-cb2b",
+  "checkpoint": "C:\\Users\\vhavi\\rl-robot-path-planning\\data\\experiments\\20261016-032234-studio-demo-dqn-cb2b\\run\\best.pt",
+  "checkpoint_name": "best.pt",
+  "checkpoint_mtime": 1792101211.5775235,
+  "training": {
+   "episodes": 400,
+   "total_steps": 30000,
+   "duration_s": 0.0,
+   "best_validation_success": 0.6,
+   "checkpoint_eval": {
+    "episodes": 30,
+    "success_rate": 0.6,
+    "success_ci_low": 0.42320052498273836,
+    "success_ci_high": 0.7540960567391659,
+    "collision_rate": 0.4,
+    "timeout_rate": 0.0,
+    "no_path_rate": 0.0,
+    "mean_steps_success": 94.0,
+    "mean_path_length_success": 5.570833333333334,
+    "mean_path_ratio_success": 1.598610068442393,
+    "mean_inference_ms": 0.07784340404858339,
+    "mean_planning_ms": 0.0,
+    "mean_nodes_expanded": 0.0,
+    "interventions_per_episode": 0.0
+   }
+  },
+  "created": 1792101211.5775235,
+  "registered": 1792104339.328805,
+  "benchmarks": []
+ },
+ {
+  "model_id": "m-422f7a276c",
+  "label": "Studio demo DQN / last.pt",
+  "algorithm": "dqn",
+  "architecture": {
+   "type": "MLP Q-network",
+   "hidden": [
+    128,
+    128
+   ],
+   "obs_dim": 29,
+   "n_actions": 4,
+   "double_dqn": true,
+   "parameters": 20868
+  },
+  "interface": {
+   "sensor": {
+    "num_beams": 24,
+    "fov_deg": 360,
+    "max_range": 3.0
+   },
+   "actions": {
+    "forward": [
+     0.3,
+     0.0
+    ],
+    "turn_left": [
+     0.0,
+     1.2
+    ],
+    "turn_right": [
+     0.0,
+     -1.2
+    ],
+    "stop": [
+     0.0,
+     0.0
+    ]
+   },
+   "robot": {
+    "radius": 0.15,
+    "control_dt": 0.25
+   },
+   "observation": "ranges/max_range + goal(dist,sin,cos) + last(v,w)",
+   "sim_version": "nexus-sim-2"
+  },
+  "env_version": "env-12fbdbd8",
+  "training_config": {
+   "hyperparameters": {
+    "hidden": [
+     128,
+     128
+    ],
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "buffer_size": 200000,
+    "learning_starts": 5000,
+    "train_freq": 1,
+    "target_update_interval": 2000,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_steps": 100000,
+    "double_dqn": true,
+    "grad_clip": 10.0
+   },
+   "reward": {
+    "goal": 10.0,
+    "collision": -10.0,
+    "step": -0.05,
+    "progress_scale": 1.0,
+    "stop_penalty": -0.5,
+    "turn_reversal_penalty": -0.1,
+    "proximity_threshold": 0.35,
+    "proximity_penalty": -0.05,
+    "safety_intervention": -0.1
+   },
+   "randomization": {
+    "enabled": true,
+    "obstacle_density": [
+     0.05,
+     0.25
+    ],
+    "linear_scale": [
+     0.9,
+     1.1
+    ],
+    "angular_scale": [
+     0.9,
+     1.1
+    ],
+    "motion_noise_std": 0.05,
+    "sensor_noise_std": [
+     0.0,
+     0.03
+    ],
+    "sensor_dropout_prob": [
+     0.0,
+     0.02
+    ]
+   },
+   "world": {
+    "width": 6.0,
+    "height": 6.0,
+    "obstacle_density": 0.15,
+    "obstacle_size": [
+     0.3,
+     1.0
+    ],
+    "goal_radius": 0.3,
+    "min_start_goal_dist": 2.5,
+    "start_goal_clearance": 0.35,
+    "num_moving_obstacles": 0,
+    "moving_obstacle_radius": 0.2,
+    "moving_obstacle_speed": 0.2
+   }
+  },
+  "seed": 0,
+  "experiment_id": "20261016-032234-studio-demo-dqn-cb2b",
+  "checkpoint": "C:\\Users\\vhavi\\rl-robot-path-planning\\data\\experiments\\20261016-032234-studio-demo-dqn-cb2b\\run\\last.pt",
+  "checkpoint_name": "last.pt",
+  "checkpoint_mtime": 1792101245.7162883,
+  "training": {
+   "episodes": 400,
+   "total_steps": 45227,
+   "duration_s": 0.0,
+   "best_validation_success": 0.6,
+   "checkpoint_eval": null
+  },
+  "created": 1792101245.7162883,
+  "registered": 1792104339.3343406,
+  "benchmarks": []
+ }
+]

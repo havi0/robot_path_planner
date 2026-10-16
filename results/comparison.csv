@@ -1,0 +1,7 @@
+method,density,success_rate,success_ci_low,success_ci_high,collision_rate,timeout_rate,no_path_rate,mean_path_ratio_success,mean_steps_success,mean_path_length_success,mean_inference_ms,mean_planning_ms,mean_nodes_expanded,interventions_per_episode
+DQN,0.15,0.86,0.7786,0.9147,0.09,0.05,0.0,1.1914,72.8605,4.398,0.0688,0.0,0.0,0.0
+DQN + recovery,0.15,0.89,0.8137,0.9375,0.09,0.02,0.0,1.2233,77.0112,4.5312,0.0824,0.0,0.0,0.0
+DQN + recovery + shield,0.15,0.93,0.8625,0.9657,0.0,0.07,0.0,1.2414,86.8925,4.6105,0.1,0.0,0.0,6.41
+Q-learning,0.15,0.41,0.3187,0.508,0.0,0.59,0.0,1.15,60.0732,3.7171,0.0363,0.0,0.0,0.0
+A*,0.15,1.0,0.963,1.0,0.0,0.0,0.0,1.0112,78.91,3.8295,0.0015,5.7866,1277.81,0.0
+Dijkstra,0.15,1.0,0.963,1.0,0.0,0.0,0.0,1.0142,79.38,3.8423,0.0015,17.2084,5519.99,0.0

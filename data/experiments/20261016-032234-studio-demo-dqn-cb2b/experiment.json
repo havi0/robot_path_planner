@@ -1,0 +1,119 @@
+{
+  "id": "20261016-032234-studio-demo-dqn-cb2b",
+  "name": "Studio demo DQN",
+  "algorithm": "dqn",
+  "hyperparameters": {
+    "hidden": [
+      128,
+      128
+    ],
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "buffer_size": 200000,
+    "learning_starts": 5000,
+    "train_freq": 1,
+    "target_update_interval": 2000,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_steps": 100000,
+    "double_dqn": true,
+    "grad_clip": 10.0
+  },
+  "environment": {
+    "world": {
+      "width": 6.0,
+      "height": 6.0,
+      "obstacle_density": 0.15,
+      "obstacle_size": [
+        0.3,
+        1.0
+      ],
+      "goal_radius": 0.3,
+      "min_start_goal_dist": 2.5,
+      "start_goal_clearance": 0.35,
+      "num_moving_obstacles": 0,
+      "moving_obstacle_radius": 0.2,
+      "moving_obstacle_speed": 0.2
+    },
+    "randomization": {
+      "enabled": true,
+      "obstacle_density": [
+        0.05,
+        0.25
+      ],
+      "linear_scale": [
+        0.9,
+        1.1
+      ],
+      "angular_scale": [
+        0.9,
+        1.1
+      ],
+      "motion_noise_std": 0.05,
+      "sensor_noise_std": [
+        0.0,
+        0.03
+      ],
+      "sensor_dropout_prob": [
+        0.0,
+        0.02
+      ]
+    },
+    "reward": {
+      "goal": 10.0,
+      "collision": -10.0,
+      "step": -0.05,
+      "progress_scale": 1.0,
+      "stop_penalty": -0.5,
+      "turn_reversal_penalty": -0.1,
+      "proximity_threshold": 0.35,
+      "proximity_penalty": -0.05,
+      "safety_intervention": -0.1
+    }
+  },
+  "seed": 0,
+  "status": "completed",
+  "created_at": 1792101154.9842632,
+  "started_at": 1792101154.9854035,
+  "finished_at": 1792101245.7216105,
+  "duration_s": 0.0,
+  "episodes": 400,
+  "total_steps": 45227,
+  "evaluations": [
+    {
+      "kind": "validation",
+      "total_steps": 10000,
+      "episodes": 30,
+      "success_rate": 0.2,
+      "collision_rate": 0.7333,
+      "timeout_rate": 0.0667
+    },
+    {
+      "kind": "validation",
+      "total_steps": 20000,
+      "episodes": 30,
+      "success_rate": 0.5333,
+      "collision_rate": 0.4333,
+      "timeout_rate": 0.0333
+    },
+    {
+      "kind": "validation",
+      "total_steps": 30000,
+      "episodes": 30,
+      "success_rate": 0.6,
+      "collision_rate": 0.4,
+      "timeout_rate": 0.0
+    },
+    {
+      "kind": "validation",
+      "total_steps": 40000,
+      "episodes": 30,
+      "success_rate": 0.5333,
+      "collision_rate": 0.3667,
+      "timeout_rate": 0.1
+    }
+  ],
+  "imported": false,
+  "target_episodes": 400
+}

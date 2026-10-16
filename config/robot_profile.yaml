@@ -1,0 +1,33 @@
+# Physical robot profile — only used by HardwareBackend.
+# Fill in the values for your robot. Nothing here is needed for simulation.
+
+name: diff_drive_robot
+
+geometry:
+  radius: 0.15              # must match robot.radius used in training
+  wheel_base: 0.23          # distance between wheel contact points (m)
+  wheel_radius: 0.033
+
+limits:                     # hard limits; the safety layer never exceeds these
+  max_linear_speed: 0.22
+  max_angular_speed: 1.5
+
+calibration:                # produced by `python main.py calibrate`
+  linear_scale: 1.0         # multiply commanded v by this before sending
+  angular_scale: 1.0
+
+ros2:
+  node_name: rl_navigator
+  cmd_vel_topic: /cmd_vel
+  scan_topic: /scan
+  odom_topic: /odom
+  qos_depth: 10
+
+sensor:
+  # The real scan is resampled to exactly the beam layout used in training.
+  scan_angle_offset_deg: 0.0  # rotate scan so 0 deg = robot forward
+  min_valid_range: 0.05
+
+watchdog:
+  command_timeout: 0.5      # backend stops motors if no command within this time
+  odom_timeout: 0.5

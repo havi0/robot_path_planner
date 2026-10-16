@@ -1,0 +1,46 @@
+Training DQN for 200000 steps -> runs/sweep/v1
+step    5515  ep    50  eps 0.95  return  -17.83  success 0.00  collision 0.98  loss 0.0067  [2s]
+step   11892  ep   100  eps 0.89  return  -16.59  success 0.08  collision 0.88  loss 0.0701  [14s]
+step   16540  ep   150  eps 0.84  return  -14.79  success 0.06  collision 0.94  loss 0.0695  [24s]
+  [eval @ 20000] held-out success 0.30 collision 0.10 timeout 0.60  * new best
+step   21898  ep   200  eps 0.79  return  -15.15  success 0.08  collision 0.90  loss 0.0070  [38s]
+step   27998  ep   250  eps 0.73  return  -10.44  success 0.32  collision 0.68  loss 0.0084  [50s]
+step   32442  ep   300  eps 0.69  return  -10.50  success 0.22  collision 0.78  loss 0.0651  [59s]
+step   38176  ep   350  eps 0.64  return   -5.67  success 0.50  collision 0.50  loss 0.0135  [70s]
+  [eval @ 40000] held-out success 0.35 collision 0.12 timeout 0.53  * new best
+step   44228  ep   400  eps 0.58  return   -6.28  success 0.48  collision 0.52  loss 0.0064  [86s]
+step   49590  ep   450  eps 0.53  return   -4.00  success 0.54  collision 0.46  loss 0.0058  [96s]
+step   54593  ep   500  eps 0.48  return   -3.58  success 0.54  collision 0.46  loss 0.0493  [106s]
+step   58694  ep   550  eps 0.44  return   -7.51  success 0.32  collision 0.68  loss 0.1176  [113s]
+  [eval @ 60000] held-out success 0.30 collision 0.12 timeout 0.58
+step   62930  ep   600  eps 0.40  return   -4.44  success 0.46  collision 0.54  loss 0.0107  [126s]
+step   66933  ep   650  eps 0.36  return   -2.88  success 0.52  collision 0.48  loss 0.0174  [133s]
+step   71057  ep   700  eps 0.32  return   -1.21  success 0.60  collision 0.40  loss 0.0228  [141s]
+step   75332  ep   750  eps 0.28  return   -4.41  success 0.46  collision 0.54  loss 0.0228  [150s]
+step   79616  ep   800  eps 0.24  return   -1.25  success 0.60  collision 0.40  loss 0.0467  [158s]
+  [eval @ 80000] held-out success 0.58 collision 0.03 timeout 0.38  * new best
+step   83861  ep   850  eps 0.20  return   -1.07  success 0.60  collision 0.40  loss 0.0140  [169s]
+step   89028  ep   900  eps 0.15  return   -0.55  success 0.68  collision 0.32  loss 0.1048  [179s]
+step   93758  ep   950  eps 0.11  return    1.36  success 0.72  collision 0.28  loss 0.0918  [188s]
+step   99324  ep  1000  eps 0.06  return    2.85  success 0.84  collision 0.12  loss 0.1180  [199s]
+  [eval @ 100000] held-out success 0.52 collision 0.07 timeout 0.42
+step  103397  ep  1050  eps 0.05  return    2.28  success 0.72  collision 0.28  loss 0.0670  [210s]
+step  108203  ep  1100  eps 0.05  return   -1.78  success 0.60  collision 0.38  loss 0.0377  [219s]
+step  113078  ep  1150  eps 0.05  return    3.05  success 0.80  collision 0.20  loss 0.0552  [229s]
+  [eval @ 120000] held-out success 0.02 collision 0.07 timeout 0.92
+step  122373  ep  1200  eps 0.05  return   -6.14  success 0.60  collision 0.28  loss 0.0417  [252s]
+step  133009  ep  1250  eps 0.05  return  -13.08  success 0.32  collision 0.40  loss 0.0604  [272s]
+  [eval @ 140000] held-out success 0.02 collision 0.07 timeout 0.92
+step  142712  ep  1300  eps 0.05  return   -8.88  success 0.44  collision 0.34  loss 0.2340  [296s]
+step  148917  ep  1350  eps 0.05  return   -5.32  success 0.52  collision 0.44  loss 0.0607  [308s]
+step  157041  ep  1400  eps 0.05  return  -10.13  success 0.32  collision 0.54  loss 0.0462  [323s]
+  [eval @ 160000] held-out success 0.05 collision 0.00 timeout 0.95
+step  165366  ep  1450  eps 0.05  return   -6.80  success 0.54  collision 0.34  loss 0.2568  [345s]
+step  171341  ep  1500  eps 0.05  return   -2.75  success 0.62  collision 0.34  loss 0.0339  [356s]
+step  178019  ep  1550  eps 0.05  return   -7.34  success 0.42  collision 0.48  loss 0.0438  [368s]
+  [eval @ 180000] held-out success 0.15 collision 0.13 timeout 0.72
+step  184471  ep  1600  eps 0.05  return   -7.35  success 0.44  collision 0.50  loss 0.0620  [385s]
+step  191660  ep  1650  eps 0.05  return   -4.69  success 0.56  collision 0.32  loss 0.0479  [398s]
+step  197696  ep  1700  eps 0.05  return   -4.85  success 0.52  collision 0.40  loss 0.0450  [409s]
+  [eval @ 200000] held-out success 0.38 collision 0.03 timeout 0.58
+Training plots saved in runs/sweep/v1

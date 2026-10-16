@@ -1,0 +1,120 @@
+# Default configuration for simulation, training and evaluation.
+# Units: metres, seconds, radians (unless a key ends in _deg).
+
+world:
+  width: 6.0
+  height: 6.0
+  obstacle_density: 0.15        # fraction of the arena covered by static obstacles
+  obstacle_size: [0.3, 1.0]     # min / max side length of rectangular obstacles
+  goal_radius: 0.3              # robot centre within this distance of goal = success
+  min_start_goal_dist: 2.5
+  start_goal_clearance: 0.35    # free space required around start and goal
+  num_moving_obstacles: 0
+  moving_obstacle_radius: 0.2
+  moving_obstacle_speed: 0.2
+
+robot:
+  radius: 0.15
+  control_dt: 0.25              # seconds per decision (one RL step)
+  physics_substeps: 5
+
+sensor:
+  num_beams: 24                 # beams evenly spread over the field of view
+  fov_deg: 360
+  max_range: 3.0
+  noise_std: 0.0                # gaussian range noise (m)
+  dropout_prob: 0.0             # probability a beam returns no reading
+
+# Discrete action set: name -> [linear m/s, angular rad/s]
+actions:
+  forward: [0.3, 0.0]
+  turn_left: [0.0, 1.2]
+  turn_right: [0.0, -1.2]
+  stop: [0.0, 0.0]
+
+reward:
+  goal: 10.0
+  collision: -40.0             # must exceed the discounted cost of any non-terminal loop
+                                # (wait/dither/stop near an obstacle), else crashing can be
+                                # the cheapest way out of a trap. See results/collision_fix_comparison.md
+  step: -0.05                   # time penalty
+  progress_scale: 1.0           # reward per metre of progress toward the goal
+  stop_penalty: -0.25           # "stop" while not at goal is an invalid action
+  turn_reversal_penalty: -0.1   # turn_left immediately followed by turn_right (or vice versa)
+  proximity_threshold: 0.35     # m from robot centre
+  proximity_penalty: -0.05
+  safety_intervention: -0.1     # only when training with the safety shield
+
+# Domain randomisation used during training (sim-to-real robustness).
+randomization:
+  enabled: true
+  obstacle_density: [0.05, 0.25]
+  linear_scale: [0.9, 1.1]      # actual speed = commanded * scale
+  angular_scale: [0.9, 1.1]
+  motion_noise_std: 0.05        # relative velocity noise per physics substep
+  sensor_noise_std: [0.0, 0.03]
+  sensor_dropout_prob: [0.0, 0.02]
+
+safety:
+  max_linear_speed: 0.3
+  max_angular_speed: 1.5
+  max_linear_accel: 1.5         # m/s^2, applies to speeding up only
+  max_angular_accel: 8.0
+  stop_distance: 0.12           # look-ahead beyond the robot's front surface (must exceed max travel per step)
+  lateral_margin: 0.05          # corridor half-width = robot radius + this
+  sensor_timeout: 0.5
+  min_valid_beam_fraction: 0.5
+  allow_reverse: false
+
+dqn:
+  hidden: [128, 128]
+  lr: 0.00025
+  gamma: 0.99
+  batch_size: 128
+  buffer_size: 200000
+  learning_starts: 5000
+  train_freq: 1
+  target_update_interval: 2000
+  eps_start: 1.0
+  eps_end: 0.05
+  eps_decay_steps: 100000
+  double_dqn: true
+  grad_clip: 10.0
+
+qlearning:
+  alpha: 0.1
+  gamma: 0.99
+  eps_start: 1.0
+  eps_end: 0.05
+  eps_decay_episodes: 4000
+  episodes: 6000
+
+training:
+  seed: 0
+  total_steps: 250000
+  max_episode_steps: 400
+  use_safety_shield: false      # train the raw policy; the shield is evaluated separately
+  eval_every: 10000
+  eval_episodes: 100
+  log_every_episodes: 50
+  torch_threads: 1
+
+evaluation:
+  # Training maps are drawn from seeds below this value; evaluation maps from
+  # seeds at or above it, so the policy is always tested on unseen maps.
+  heldout_seed_offset: 1000000
+  episodes_per_setting: 100
+  densities: [0.05, 0.10, 0.15, 0.20, 0.25]
+  sensor_noise_levels: [0.0, 0.02, 0.05, 0.10]
+  motion_noise_levels: [0.0, 0.05, 0.10, 0.20]
+  planner_resolution: 0.05
+  planner_inflation: 0.10       # extra clearance (m) beyond robot radius
+
+# A learned policy is only reported as "validated" when it meets these criteria on the
+# shared benchmark (unseen evaluation scenarios), evaluated WITHOUT the safety shield so
+# the policy itself is judged. Bounds are 95% Wilson confidence limits.
+validation:
+  benchmark_set: benchmark-v1
+  min_episodes: 90
+  max_collision_upper_ci: 0.05
+  min_success_lower_ci: 0.60

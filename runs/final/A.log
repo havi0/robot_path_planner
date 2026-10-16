@@ -1,0 +1,74 @@
+Training DQN for 250000 steps -> runs/final/A
+step    5653  ep    50  eps 0.95  return  -31.77  success 0.00  collision 0.98  loss 0.0046  [2s]
+  [eval @ 10000] validation success 0.28 collision 0.70 timeout 0.02  * new best
+step   11345  ep   100  eps 0.89  return  -29.89  success 0.02  collision 0.90  loss 0.0277  [15s]
+step   17177  ep   150  eps 0.84  return  -28.38  success 0.08  collision 0.90  loss 0.0541  [25s]
+  [eval @ 20000] validation success 0.44 collision 0.31 timeout 0.25  * new best
+step   24065  ep   200  eps 0.77  return  -27.60  success 0.22  collision 0.76  loss 0.0536  [41s]
+  [eval @ 30000] validation success 0.44 collision 0.29 timeout 0.27  * new best
+step   30794  ep   250  eps 0.71  return  -23.64  success 0.34  collision 0.66  loss 0.0059  [57s]
+step   38061  ep   300  eps 0.64  return  -19.45  success 0.50  collision 0.50  loss 0.0044  [70s]
+  [eval @ 40000] validation success 0.58 collision 0.33 timeout 0.09  * new best
+step   44371  ep   350  eps 0.58  return  -16.41  success 0.48  collision 0.52  loss 0.0763  [85s]
+  [eval @ 50000] validation success 0.64 collision 0.18 timeout 0.18  * new best
+step   50185  ep   400  eps 0.52  return  -14.73  success 0.44  collision 0.56  loss 0.0244  [99s]
+step   56644  ep   450  eps 0.46  return  -10.96  success 0.66  collision 0.32  loss 0.0197  [111s]
+  [eval @ 60000] validation success 0.76 collision 0.20 timeout 0.04  * new best
+step   61728  ep   500  eps 0.41  return   -5.18  success 0.72  collision 0.28  loss 0.0083  [123s]
+step   66523  ep   550  eps 0.37  return   -5.15  success 0.66  collision 0.34  loss 0.0165  [132s]
+  [eval @ 70000] validation success 0.71 collision 0.13 timeout 0.16
+step   71588  ep   600  eps 0.32  return   -4.03  success 0.72  collision 0.28  loss 0.0640  [145s]
+step   76059  ep   650  eps 0.28  return   -2.22  success 0.72  collision 0.28  loss 0.0392  [153s]
+  [eval @ 80000] validation success 0.78 collision 0.19 timeout 0.03  * new best
+step   80112  ep   700  eps 0.24  return   -1.34  success 0.70  collision 0.30  loss 0.0140  [163s]
+step   84204  ep   750  eps 0.20  return    0.74  success 0.76  collision 0.24  loss 0.1224  [171s]
+step   88797  ep   800  eps 0.16  return    0.23  success 0.78  collision 0.22  loss 0.0111  [179s]
+  [eval @ 90000] validation success 0.77 collision 0.09 timeout 0.14
+step   93307  ep   850  eps 0.11  return   -0.86  success 0.70  collision 0.30  loss 0.0275  [191s]
+step   97325  ep   900  eps 0.08  return    1.77  success 0.76  collision 0.24  loss 0.0987  [198s]
+  [eval @ 100000] validation success 0.74 collision 0.14 timeout 0.12
+step  101300  ep   950  eps 0.05  return    2.37  success 0.76  collision 0.24  loss 0.0190  [209s]
+step  105445  ep  1000  eps 0.05  return    1.42  success 0.76  collision 0.24  loss 0.0153  [217s]
+step  109208  ep  1050  eps 0.05  return    2.07  success 0.74  collision 0.26  loss 0.0337  [223s]
+  [eval @ 110000] validation success 0.69 collision 0.22 timeout 0.09
+step  113083  ep  1100  eps 0.05  return    1.56  success 0.72  collision 0.28  loss 0.0464  [234s]
+step  116791  ep  1150  eps 0.05  return    3.10  success 0.80  collision 0.18  loss 0.0291  [241s]
+  [eval @ 120000] validation success 0.72 collision 0.18 timeout 0.10
+step  120771  ep  1200  eps 0.05  return    0.57  success 0.70  collision 0.30  loss 0.1021  [251s]
+step  124299  ep  1250  eps 0.05  return    3.35  success 0.76  collision 0.24  loss 0.0600  [258s]
+step  128173  ep  1300  eps 0.05  return    2.06  success 0.74  collision 0.24  loss 0.0850  [265s]
+  [eval @ 130000] validation success 0.60 collision 0.05 timeout 0.35
+step  133009  ep  1350  eps 0.05  return   -0.77  success 0.70  collision 0.30  loss 0.0801  [279s]
+step  137138  ep  1400  eps 0.05  return    1.78  success 0.74  collision 0.24  loss 0.0668  [287s]
+  [eval @ 140000] validation success 0.54 collision 0.14 timeout 0.32
+step  141697  ep  1450  eps 0.05  return    1.25  success 0.74  collision 0.26  loss 0.0670  [301s]
+step  147705  ep  1500  eps 0.05  return   -3.77  success 0.68  collision 0.28  loss 0.0390  [313s]
+  [eval @ 150000] validation success 0.07 collision 0.13 timeout 0.80
+step  156220  ep  1550  eps 0.05  return  -11.30  success 0.50  collision 0.34  loss 0.1245  [336s]
+  [eval @ 160000] validation success 0.07 collision 0.14 timeout 0.79
+step  165164  ep  1600  eps 0.05  return  -14.01  success 0.44  collision 0.38  loss 0.1509  [359s]
+  [eval @ 170000] validation success 0.11 collision 0.35 timeout 0.54
+step  173845  ep  1650  eps 0.05  return  -14.64  success 0.30  collision 0.50  loss 0.2609  [380s]
+  [eval @ 180000] validation success 0.17 collision 0.30 timeout 0.53
+step  181874  ep  1700  eps 0.05  return  -11.88  success 0.36  collision 0.48  loss 0.0763  [399s]
+  [eval @ 190000] validation success 0.18 collision 0.27 timeout 0.55
+step  190320  ep  1750  eps 0.05  return  -15.90  success 0.24  collision 0.58  loss 0.0750  [421s]
+  [eval @ 200000] validation success 0.14 collision 0.21 timeout 0.65
+step  200473  ep  1800  eps 0.05  return  -18.68  success 0.28  collision 0.50  loss 0.0849  [447s]
+step  206875  ep  1850  eps 0.05  return   -6.65  success 0.56  collision 0.40  loss 0.2929  [458s]
+  [eval @ 210000] validation success 0.60 collision 0.24 timeout 0.16
+step  211758  ep  1900  eps 0.05  return   -1.59  success 0.68  collision 0.30  loss 0.0521  [470s]
+step  215204  ep  1950  eps 0.05  return   -1.18  success 0.60  collision 0.40  loss 0.0686  [476s]
+step  219050  ep  2000  eps 0.05  return    2.71  success 0.78  collision 0.22  loss 0.3314  [483s]
+  [eval @ 220000] validation success 0.62 collision 0.23 timeout 0.15
+step  223173  ep  2050  eps 0.05  return    0.26  success 0.70  collision 0.30  loss 0.0637  [493s]
+step  227026  ep  2100  eps 0.05  return    1.22  success 0.70  collision 0.30  loss 0.0630  [500s]
+  [eval @ 230000] validation success 0.53 collision 0.14 timeout 0.33
+step  230455  ep  2150  eps 0.05  return    1.89  success 0.72  collision 0.28  loss 0.3878  [510s]
+step  234964  ep  2200  eps 0.05  return   -3.27  success 0.60  collision 0.36  loss 0.0348  [518s]
+step  238624  ep  2250  eps 0.05  return    4.32  success 0.82  collision 0.18  loss 0.0934  [525s]
+  [eval @ 240000] validation success 0.62 collision 0.09 timeout 0.29
+step  242718  ep  2300  eps 0.05  return    1.78  success 0.76  collision 0.22  loss 0.0347  [536s]
+step  246683  ep  2350  eps 0.05  return    3.56  success 0.84  collision 0.16  loss 0.1821  [542s]
+  [eval @ 250000] validation success 0.71 collision 0.17 timeout 0.12
+Training plots saved in runs/final/A

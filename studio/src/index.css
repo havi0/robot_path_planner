@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   NEXUS design tokens. Near-black surfaces, cool-grey hairlines,
+   off-white ink; electric violet + muted cyan used sparingly.
+   Status colours are reserved for state and always ship with a label.
+   ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "Inter Variable", "Inter", system-ui, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --color-bg: #0a0b0d;
+  --color-surface: #111317;
+  --color-surface-2: #161920;
+  --color-surface-3: #1c2028;
+  --color-line: #22262e;
+  --color-line-strong: #2f3440;
+  --color-ink: #eceef2;
+  --color-ink-2: #b0b6c2;
+  --color-ink-3: #7f8694;
+
+  --color-violet: #8b7cf6;
+  --color-violet-soft: #8b7cf622;
+  --color-cyan: #5ec8d8;
+  --color-cyan-soft: #5ec8d81f;
+
+  --color-good: #3fb950;
+  --color-warn: #e3b341;
+  --color-bad: #f0524f;
+  --color-serious: #ec835a;
+
+  /* validated chart series (dark surface): violet, orange, aqua, yellow */
+  --color-s1: #9085e9;
+  --color-s2: #d95926;
+  --color-s3: #199e70;
+  --color-s4: #c98500;
+
+  --radius-panel: 12px;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.85); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /* ambient light: faint violet from the top right, faint blue from the bottom left */
+  background:
+    radial-gradient(1100px 640px at 88% -10%, #8b7cf617, transparent 62%),
+    radial-gradient(900px 620px at -12% 108%, #5aa2ff0f, transparent 60%),
+    var(--color-bg);
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+::selection {
+  background: #8b7cf655;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-violet);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@layer components {
+  /* Elevated surface: frosted charcoal with a gradient hairline (brighter at the top edge),
+     an inner specular line and a soft two-layer ambient shadow. */
+  .panel {
+    background:
+      linear-gradient(180deg, #16181ff2, #111318f2) padding-box,
+      linear-gradient(180deg, #ffffff17, #ffffff07 38%, #ffffff04) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius-panel);
+    box-shadow: inset 0 1px 0 #ffffff09, 0 1px 2px #00000066, 0 18px 40px -26px #000000d9;
+  }
+  /* Interactive tile: lifts on hover, presses on click. */
+  .tile {
+    background:
+      linear-gradient(180deg, #1b1e27, #15171e) padding-box,
+      linear-gradient(180deg, #ffffff1a, #ffffff06) border-box;
+    border: 1px solid transparent;
+    box-shadow: inset 0 1px 0 #ffffff0a, 0 1px 2px #00000059, 0 10px 24px -18px #000000cc;
+    transition: box-shadow 200ms, background 200ms, transform 380ms cubic-bezier(.2,.8,.2,1);
+  }
+  .tile:hover {
+    background:
+      linear-gradient(180deg, #1f2230, #171922) padding-box,
+      linear-gradient(180deg, #8b7cf666, #ffffff0a) border-box;
+    box-shadow: inset 0 1px 0 #ffffff12, 0 2px 4px #00000066, 0 22px 40px -22px #8b7cf640, 0 18px 36px -24px #000000e6;
+  }
+  .tile:active { transform: translateY(1px) scale(0.995) !important; }
+  .hero-shell {
+    background:
+      radial-gradient(900px 520px at 72% 40%, #8b7cf61c, transparent 65%),
+      radial-gradient(700px 420px at 95% 100%, #5aa2ff14, transparent 60%),
+      linear-gradient(180deg, #0d0e13, #0a0b0f);
+    box-shadow: inset 0 1px 0 #ffffff0d, 0 0 0 1px #ffffff0d, 0 40px 80px -48px #000;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .hairline-grid {
+    background-image:
+      linear-gradient(to right, #ffffff07 1px, transparent 1px),
+      linear-gradient(to bottom, #ffffff07 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}

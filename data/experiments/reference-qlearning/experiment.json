@@ -1,0 +1,176 @@
+{
+  "id": "reference-qlearning",
+  "name": "Reference Q-learning (report model)",
+  "algorithm": "qlearning",
+  "hyperparameters": {
+    "alpha": 0.1,
+    "gamma": 0.99,
+    "eps_start": 1.0,
+    "eps_end": 0.05,
+    "eps_decay_episodes": 4000,
+    "episodes": 6000
+  },
+  "environment": {
+    "world": {
+      "width": 6.0,
+      "height": 6.0,
+      "obstacle_density": 0.15,
+      "obstacle_size": [
+        0.3,
+        1.0
+      ],
+      "goal_radius": 0.3,
+      "min_start_goal_dist": 2.5,
+      "start_goal_clearance": 0.35,
+      "num_moving_obstacles": 0,
+      "moving_obstacle_radius": 0.2,
+      "moving_obstacle_speed": 0.2
+    },
+    "randomization": {
+      "enabled": true,
+      "obstacle_density": [
+        0.05,
+        0.25
+      ],
+      "linear_scale": [
+        0.9,
+        1.1
+      ],
+      "angular_scale": [
+        0.9,
+        1.1
+      ],
+      "motion_noise_std": 0.05,
+      "sensor_noise_std": [
+        0.0,
+        0.03
+      ],
+      "sensor_dropout_prob": [
+        0.0,
+        0.02
+      ]
+    },
+    "reward": {
+      "goal": 10.0,
+      "collision": -10.0,
+      "step": -0.05,
+      "progress_scale": 1.0,
+      "stop_penalty": -0.5,
+      "turn_reversal_penalty": -0.1,
+      "proximity_threshold": 0.35,
+      "proximity_penalty": -0.05,
+      "safety_intervention": -0.1
+    }
+  },
+  "seed": 0,
+  "status": "completed",
+  "created_at": 1792084635.0033913,
+  "started_at": null,
+  "finished_at": 1792085213.690455,
+  "duration_s": null,
+  "episodes": 6000,
+  "total_steps": 952272,
+  "evaluations": [
+    {
+      "kind": "validation",
+      "total_steps": 59825,
+      "episodes": 100,
+      "success_rate": 0.2,
+      "collision_rate": 0.14,
+      "timeout_rate": 0.66
+    },
+    {
+      "kind": "validation",
+      "total_steps": 128308,
+      "episodes": 100,
+      "success_rate": 0.1,
+      "collision_rate": 0.05,
+      "timeout_rate": 0.85
+    },
+    {
+      "kind": "validation",
+      "total_steps": 221622,
+      "episodes": 100,
+      "success_rate": 0.04,
+      "collision_rate": 0.0,
+      "timeout_rate": 0.96
+    },
+    {
+      "kind": "validation",
+      "total_steps": 307716,
+      "episodes": 100,
+      "success_rate": 0.24,
+      "collision_rate": 0.0,
+      "timeout_rate": 0.76
+    },
+    {
+      "kind": "validation",
+      "total_steps": 393772,
+      "episodes": 100,
+      "success_rate": 0.23,
+      "collision_rate": 0.0,
+      "timeout_rate": 0.77
+    },
+    {
+      "kind": "validation",
+      "total_steps": 476391,
+      "episodes": 100,
+      "success_rate": 0.28,
+      "collision_rate": 0.0,
+      "timeout_rate": 0.72
+    },
+    {
+      "kind": "validation",
+      "total_steps": 552612,
+      "episodes": 100,
+      "success_rate": 0.12,
+      "collision_rate": 0.0,
+      "timeout_rate": 0.88
+    },
+    {
+      "kind": "validation",
+      "total_steps": 629290,
+      "episodes": 100,
+      "success_rate": 0.09,
+      "collision_rate": 0.01,
+      "timeout_rate": 0.9
+    },
+    {
+      "kind": "validation",
+      "total_steps": 713792,
+      "episodes": 100,
+      "success_rate": 0.12,
+      "collision_rate": 0.01,
+      "timeout_rate": 0.87
+    },
+    {
+      "kind": "validation",
+      "total_steps": 798791,
+      "episodes": 100,
+      "success_rate": 0.31,
+      "collision_rate": 0.0,
+      "timeout_rate": 0.69
+    },
+    {
+      "kind": "validation",
+      "total_steps": 875044,
+      "episodes": 100,
+      "success_rate": 0.39,
+      "collision_rate": 0.02,
+      "timeout_rate": 0.59
+    },
+    {
+      "kind": "validation",
+      "total_steps": 952272,
+      "episodes": 100,
+      "success_rate": 0.1,
+      "collision_rate": 0.02,
+      "timeout_rate": 0.88
+    }
+  ],
+  "imported": true,
+  "checkpoint_paths": [
+    "C:\\Users\\vhavi\\rl-robot-path-planning\\models\\qlearning.pt"
+  ],
+  "notes": "Imported from runs\\final\\Q (trained with the CLI)."
+}
