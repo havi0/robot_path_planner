@@ -16,6 +16,7 @@ from environment.nav_env import NavigationEnv
 from evaluation.evaluate import (dqn_method, evaluate_method, heldout_seeds, load_dqn, load_qlearning,
                                  make_discretizer, qlearning_method, validation_seeds, with_recovery)
 from training.logger import plain
+from navigation import robots as R
 from scenarios.curriculum import Curriculum
 from training.train_dqn import DQNTrainer
 
@@ -115,6 +116,15 @@ class TrainingManager:
             cfg.randomization.obstacle_density = [float(lo), float(hi)]
         if req.get("randomization") is not None:
             cfg.randomization.enabled = bool(req["randomization"])
+        robot = req.get("robot")
+        if robot and robot.get("id", R.REFERENCE) != R.REFERENCE:
+            try:
+                prof = R.get_profile(robot["id"], robot.get("custom"))
+            except R.RobotError as e:
+                raise TrainingError(str(e)) from None
+            if not prof["training"]:
+                raise TrainingError(f"Training is not available for the {prof['name']}: {prof.get('training_note', '')}")
+            R.apply_profile(cfg, prof)
         return cfg
 
     # ------------------------------------------------------------ control
@@ -126,6 +136,7 @@ class TrainingManager:
             cfg = self._build_cfg(req)
             hp = plain(cfg.dqn) if algo == "dqn" else plain(cfg.qlearning)
             env = {"world": plain(cfg.world), "randomization": plain(cfg.randomization), "reward": plain(cfg.reward)}
+            env["robot"] = {"id": cfg.robot.get("profile_id", R.REFERENCE), **R.robot_signature(cfg)}
             meta = self.store.create(req["name"].strip(), algo, hp, env, cfg.training.seed,
                                      {"target_episodes": int(req.get("episodes", 1000))})
             self.experiment_id = meta["id"]

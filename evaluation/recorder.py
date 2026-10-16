@@ -21,7 +21,7 @@ from baselines.grid_planners import astar, dijkstra
 from environment.nav_env import NavigationEnv
 from evaluation.behavior import profile_episode
 from evaluation.evaluate import plan_with_fallback
-from navigation.policies import DQNPolicy, PathFollowerPolicy, QTablePolicy, RecoveryWrapper
+from navigation.policies import DQNPolicy, QTablePolicy, RecoveryWrapper, path_follower
 from scenarios.io import world_from_dict, world_to_dict
 from sensors.observation import observation_builder_from_config
 from sensors.types import beam_angles
@@ -47,7 +47,7 @@ def build_policy(key, cfg, agent=None, agent_cfg=None):
     if key == "qlearning":
         return QTablePolicy(agent), None
     if key in ("astar", "dijkstra"):
-        return PathFollowerPolicy(acts, POLICY_NAMES[key]), (astar if key == "astar" else dijkstra)
+        return path_follower(acts, POLICY_NAMES[key]), (astar if key == "astar" else dijkstra)
     raise ValueError(f"unknown policy {key}")
 
 
@@ -59,6 +59,10 @@ def episode_cfg(base_cfg, world, conditions):
     if conditions.get("max_angular"):
         w = float(conditions["max_angular"])
         cfg.actions.turn_left, cfg.actions.turn_right = [0.0, w], [0.0, -w]
+    robot = conditions.get("robot")           # absent for the reference robot (older recordings too)
+    if robot:
+        from navigation.robots import apply_profile, get_profile
+        apply_profile(cfg, get_profile(robot["id"], robot.get("custom")), conditions.get("max_linear"), conditions.get("max_angular"))
     return cfg
 
 

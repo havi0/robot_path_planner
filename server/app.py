@@ -30,7 +30,8 @@ from server.experiments import ExperimentStore  # noqa: E402
 from server.hardware_service import HardwareBridge, HardwareError  # noqa: E402
 from server.models import ModelRegistry  # noqa: E402
 from server.planner_service import PlannerError, compare  # noqa: E402
-from server.sim_session import SimSession, ValidationError  # noqa: E402
+from server.sim_session import RobotFitError, SimSession, ValidationError  # noqa: E402
+from navigation import robots as robot_catalog  # noqa: E402
 from server.training_manager import TrainingError, TrainingManager  # noqa: E402
 from server import routes_research  # noqa: E402
 from server.catalog import ModelCatalog, compatibility_issues  # noqa: E402
@@ -125,6 +126,13 @@ class TrainReq(BaseModel):
     randomization: Optional[bool] = None
     eval_every: Optional[int] = None
     curriculum: Optional[dict] = None
+    robot: Optional[dict] = None          # {"id": ..., "custom": {...}}; omitted = reference robot
+
+
+class RobotSelectReq(BaseModel):
+    id: str
+    custom: Optional[dict] = None
+    regenerate: bool = False
 
 
 class EvalReq(BaseModel):
@@ -224,6 +232,23 @@ def create_app(data_dir=None, dqn_path=None, q_path=None, broadcast_hz=15.0):
 
         sim.on_episode = episodes.save
         sim.model_meta = model_meta
+        robot_file = os.path.join(data_dir, "robot_selection.json")
+
+        def save_robot(sel):
+            tmp = robot_file + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(sel, f)
+            os.replace(tmp, robot_file)
+
+        if os.path.exists(robot_file):                  # restore the user's last robot choice
+            try:
+                with open(robot_file, encoding="utf-8") as f:
+                    sel = json.load(f)
+                if sel.get("id") and sel["id"] != robot_catalog.REFERENCE:
+                    sim.select_robot(sel["id"], sel.get("custom"), regenerate=True)
+            except Exception as e:
+                events.emit("warning", "robot", f"Saved robot selection ignored: {e}")
+        sim.on_robot_change = save_robot
         training.on_finished = lambda exp_id: [catalog.register(c["path"], store.get(exp_id))
                                                for c in store.get(exp_id)["checkpoints"]]
         app.state.svc = dict(events=events, models=models, store=store, sim=sim, training=training,
@@ -310,6 +335,19 @@ def create_app(data_dir=None, dqn_path=None, q_path=None, broadcast_hz=15.0):
     def sim_policy(req: PolicyReq, request: Request):
         svc(request, "sim").set_policy(req.policy)
         return {"policy": req.policy}
+
+    @app.get("/api/robots")
+    def robots_list(request: Request):
+        return {"robots": robot_catalog.catalog(), **svc(request, "sim").robot_state()}
+
+    @app.post("/api/robots/select")
+    def robots_select(req: RobotSelectReq, request: Request):
+        sim = svc(request, "sim")
+        try:
+            notes = sim.select_robot(req.id, req.custom, req.regenerate)
+        except RobotFitError as e:
+            raise HTTPException(409, str(e)) from None
+        return {"notes": notes, **sim.robot_state()}
 
     @app.post("/api/sim/shield")
     def sim_shield(req: ShieldReq, request: Request):

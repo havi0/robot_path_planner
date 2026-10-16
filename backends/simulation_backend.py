@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 from backends.base import RobotBackend
-from environment.robot import DiffDriveModel, RobotState
+from environment.robot import RobotState, make_motion_model
 from environment.world import generate_world
 from navigation.actions import STOP
 from sensors.range_sensor import SimulatedRangeSensor
@@ -19,7 +19,8 @@ class SimulationBackend(RobotBackend):
         self.rng = np.random.default_rng(seed)
         self.sensor = SimulatedRangeSensor(cfg.sensor.num_beams, cfg.sensor.fov_deg, cfg.sensor.max_range,
                                            cfg.sensor.noise_std, cfg.sensor.dropout_prob)
-        self.model = DiffDriveModel(cfg.robot.radius, rng=self.rng)
+        self.model = make_motion_model(cfg.robot.get("kinematics"), cfg.robot.radius, rng=self.rng,
+                                       params=cfg.robot.get("kinematics_params"))
         self.sub_dt = cfg.robot.control_dt / cfg.robot.physics_substeps
         self.world = None
         self.state = None
@@ -62,8 +63,8 @@ class SimulationBackend(RobotBackend):
         self.world = world or generate_world(self.cfg.world, self.cfg.robot.radius, self.rng,
                                              density=p["density"], num_movers=num_movers,
                                              num_obstacles=num_obstacles)
-        self.model = DiffDriveModel(self.cfg.robot.radius, p["linear_scale"], p["angular_scale"],
-                                    p["motion_noise"], self.rng)
+        self.model = make_motion_model(self.cfg.robot.get("kinematics"), self.cfg.robot.radius, p["linear_scale"],
+                                       p["angular_scale"], p["motion_noise"], self.rng, self.cfg.robot.get("kinematics_params"))
         self.sensor.noise_std = p["sensor_noise"]
         self.sensor.dropout_prob = p["dropout"]
         self.state = RobotState(*self.world.start)
@@ -98,7 +99,7 @@ class SimulationBackend(RobotBackend):
         """Number of collision-checked integration steps for one command of duration dt.
         Never fewer than configured (keeps existing recordings bit-exact at nominal speeds)."""
         m = self.model
-        trans = abs(self._cmd.v) * max(m.linear_scale, 1.0) * (1 + 3 * m.noise_std) * dt
+        trans = math.hypot(self._cmd.v, self._cmd.vy) * max(m.linear_scale, 1.0) * (1 + 3 * m.noise_std) * dt
         rot = abs(self._cmd.w) * max(m.angular_scale, 1.0) * (1 + 3 * m.noise_std) * dt
         base = max(1, round(dt / self.sub_dt))
         return max(base, math.ceil(trans / self.MAX_CHECK_TRANSLATION), math.ceil(rot / self.MAX_CHECK_ROTATION))
@@ -110,7 +111,10 @@ class SimulationBackend(RobotBackend):
         for _ in range(n):
             if self.collided:
                 break
-            new = self.model.integrate(self.state, self._cmd.v, self._cmd.w, h)
+            if self._cmd.vy:          # holonomic robots only
+                new = self.model.integrate(self.state, self._cmd.v, self._cmd.w, h, self._cmd.vy)
+            else:
+                new = self.model.integrate(self.state, self._cmd.v, self._cmd.w, h)
             self.world.step_movers(h)
             if self.world.collides(new.x, new.y, r):
                 self._record_collision(self.state, new, r)

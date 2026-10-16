@@ -118,7 +118,19 @@ class SafetyLayer:
             reasons.append("velocity_limited")
         v, w = v_lim, w_lim
 
-        if v != 0 and self.motion_blocked(reading, v, w, dt):
+        vy = cmd.vy                       # sideways velocity: holonomic robots only (0 otherwise)
+        if vy:
+            if not math.isfinite(vy):
+                reasons.append("invalid_command")
+                return STOP
+            vy_lim = float(np.clip(vy, -c.max_linear_speed, c.max_linear_speed))
+            if vy_lim != vy:
+                reasons.append("velocity_limited")
+            vy = vy_lim
+            if self.motion_blocked(reading, v, w, dt, vy=vy):
+                v, vy = 0.0, 0.0          # keep only the rotation: safe for a circular footprint
+                reasons.append("proximity_stop")
+        elif v != 0 and self.motion_blocked(reading, v, w, dt):
             v = 0.0                       # keep only the rotation: safe for a circular footprint
             reasons.append("proximity_stop")
 
@@ -136,9 +148,15 @@ class SafetyLayer:
             if w_r != w:
                 reasons.append("accel_limited")
             w = w_r
-        return VelocityCommand(v, w)
+        if vy and abs(vy) > abs(last.vy):
+            dv = c.max_linear_accel * dt
+            vy_r = float(np.clip(vy, last.vy - dv, last.vy + dv))
+            if vy_r != vy:
+                reasons.append("accel_limited")
+            vy = vy_r
+        return VelocityCommand(v, w, vy) if vy else VelocityCommand(v, w)
 
-    def motion_blocked(self, reading, v, w, dt):
+    def motion_blocked(self, reading, v, w, dt, vy=0.0):
         """Predict the motion produced by (v, w) and test it against the sensed obstacles.
 
         The robot is a disc of radius r. Its centre follows an arc of curvature w / v. We
@@ -152,6 +170,8 @@ class SafetyLayer:
         occupies exactly the same disc, so it cannot newly intersect anything. A robot with
         a non-circular footprint would need the rotation swept as well.
         """
+        if vy:
+            return self._holonomic_blocked(reading, v, w, dt, vy)
         if v == 0:
             return False
         c = self.cfg
@@ -174,4 +194,33 @@ class SafetyLayer:
             xs, ys = np.sin(k * s) / k, (1 - np.cos(k * s)) / k
         d_now = np.hypot(px, py)
         d = np.hypot(px[None, :] - xs[:, None], py[None, :] - ys[:, None])      # poses x points
+        return bool(np.any((d < clear) & (d < d_now[None, :] - 1e-9)))
+
+    def _holonomic_blocked(self, reading, v, w, dt, vy):
+        """Same test as motion_blocked, for a holonomic command (v, vy, w): the centre follows
+        p(t) = integral of R(w t) [v, vy] dt (exact for constant body velocity), sampled every
+        1 cm of travel over max(speed * dt, stop_distance - lateral_margin)."""
+        c = self.cfg
+        if reading.safety_ranges is not None:
+            ok = np.isfinite(reading.safety_ranges)
+            r, a = reading.safety_ranges[ok], reading.safety_angles[ok]
+        else:
+            ok = reading.valid_mask
+            r, a = reading.ranges[ok], reading.angles[ok]
+        if r.size == 0:
+            return False
+        speed = math.hypot(v, vy)
+        if speed == 0:
+            return False
+        px, py = r * np.cos(a), r * np.sin(a)
+        clear = self.robot_radius + c.lateral_margin
+        length = max(speed * dt, c.stop_distance - c.lateral_margin)
+        t = np.linspace(0.0, length / speed, max(2, int(np.ceil(length / 0.01)) + 1))[1:]
+        if abs(w) < 1e-6:
+            xs, ys = v * t, vy * t
+        else:
+            xs = (v * np.sin(w * t) + vy * (np.cos(w * t) - 1)) / w
+            ys = (v * (1 - np.cos(w * t)) + vy * np.sin(w * t)) / w
+        d_now = np.hypot(px, py)
+        d = np.hypot(px[None, :] - xs[:, None], py[None, :] - ys[:, None])
         return bool(np.any((d < clear) & (d < d_now[None, :] - 1e-9)))

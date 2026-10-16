@@ -11,6 +11,7 @@ from dataclasses import dataclass
 class VelocityCommand:
     v: float = 0.0   # linear, m/s (forward positive)
     w: float = 0.0   # angular, rad/s (counter-clockwise positive)
+    vy: float = 0.0  # sideways, m/s (left positive) - holonomic robots only; 0 for every other robot
 
 
 STOP = VelocityCommand(0.0, 0.0)
@@ -18,9 +19,9 @@ STOP = VelocityCommand(0.0, 0.0)
 
 class DiscreteActionSpace:
     def __init__(self, actions):
-        """actions: mapping name -> (v, w), e.g. {"forward": (0.3, 0.0), ...}"""
+        """actions: mapping name -> (v, w) or (v, w, vy), e.g. {"forward": (0.3, 0.0), ...}"""
         self.names = list(actions.keys())
-        self.commands = [VelocityCommand(float(v), float(w)) for v, w in actions.values()]
+        self.commands = [VelocityCommand(float(a[0]), float(a[1]), float(a[2]) if len(a) > 2 else 0.0) for a in actions.values()]
 
     @classmethod
     def from_config(cls, cfg):

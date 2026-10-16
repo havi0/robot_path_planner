@@ -15,7 +15,8 @@ from baselines.grid_planners import astar, dijkstra
 from environment.nav_env import NavigationEnv
 from environment.world import World
 from evaluation.evaluate import plan_with_fallback
-from navigation.policies import DQNPolicy, PathFollowerPolicy, QTablePolicy, RecoveryWrapper
+from navigation import robots as R
+from navigation.policies import DQNPolicy, QTablePolicy, RecoveryWrapper, path_follower
 from evaluation.recorder import Runner, classify_collision, make_episode
 from scenarios.io import world_to_dict
 from sensors.observation import observation_builder_from_config
@@ -40,6 +41,10 @@ class ValidationError(ValueError):
     pass
 
 
+class RobotFitError(ValidationError):
+    """The selected robot's footprint does not fit the current map's start or goal."""
+
+
 def _check(name, value):
     lo, hi = LIMITS[name]
     if value is None or not (lo <= value <= hi):
@@ -59,6 +64,8 @@ class SimSession:
             "dynamic_obstacles": 0, "seed": base_cfg.evaluation.heldout_seed_offset,
             "max_linear": base_cfg.actions.forward[0], "max_angular": base_cfg.actions.turn_left[1],
         }
+        self.robot = R.get_profile(R.REFERENCE)   # selected simulated robot (reference = original behaviour)
+        self.on_robot_change = None              # callback(selection) - set by the app to persist the choice
         self.policy_key = "dqn_recovery" if models.get("dqn") else "astar"
         self.shield = True              # safety layer ON by default; switch off only to study the raw policy
         self.speed = 8.0                    # decisions per second (4 = real time)
@@ -107,6 +114,7 @@ class SimSession:
         cfg.actions.forward = [float(c["max_linear"]), 0.0]
         cfg.actions.turn_left = [0.0, float(c["max_angular"])]
         cfg.actions.turn_right = [0.0, -float(c["max_angular"])]
+        R.apply_profile(cfg, self.robot, c["max_linear"], c["max_angular"])   # no-op for the reference robot
         return cfg
 
     def _build_world(self, seed):
@@ -130,9 +138,17 @@ class SimSession:
             self.env.obs_builder = builder
             self.env.core.obs_builder = builder
 
+    def policy_compat(self, key):
+        entry = self.models.get("dqn" if key in ("dqn", "dqn_recovery") else "qlearning") if key in R.LEARNED else None
+        return R.policy_compatibility(key, self.robot, entry[1] if entry else None,
+                                      self.config["max_linear"], self.config["max_angular"])
+
     def _make_policy(self):
         acts = self.env.action_set
         key = self.policy_key
+        compat = self.policy_compat(key)
+        if compat["status"] == "incompatible":
+            raise ValidationError(f"{POLICIES[key]} cannot drive the {self.robot['name']}: {compat['detail']}")
         if key in ("dqn", "dqn_recovery"):
             entry = self.models.get("dqn")
             if not entry:
@@ -147,7 +163,7 @@ class SimSession:
             if not entry:
                 raise ValidationError("No Q-learning model loaded")
             return QTablePolicy(entry[0])
-        return PathFollowerPolicy(acts, POLICIES[key])
+        return path_follower(acts, POLICIES[key])
 
     def _reset_episode(self):
         world = copy.deepcopy(self.base_world)
@@ -188,6 +204,8 @@ class SimSession:
         self.rec_conditions = {"sensor_noise": self.cfg.sensor.noise_std, "dropout": self.cfg.sensor.dropout_prob,
                                "motion_noise": 0.0, "shield": self.shield, "max_linear": self.config["max_linear"],
                                "max_angular": self.config["max_angular"], "shield_toggles": []}
+        if self.robot["id"] != R.REFERENCE:      # recordings of the reference robot keep their original format
+            self.rec_conditions["robot"] = {"id": self.robot["id"], "custom": self.robot.get("custom")}
         self.rec = {k: [] for k in ("x", "y", "theta", "dist", "min_range", "action", "reward", "v", "w", "safety")}
         self.rec_terms, self.rec_interventions, self.rec_collision = {}, 0, None
         self._rec_state()
@@ -370,6 +388,63 @@ class SimSession:
             self.world_version += 1
             self._reset_episode()
 
+    # ------------------------------------------------------------ robot selection
+    def select_robot(self, robot_id, custom=None, regenerate=False):
+        """Switch the simulated robot. Keeps the current map when the new footprint fits its start
+        and goal; otherwise raises RobotFitError unless `regenerate` asks for a new map.
+        Returns a list of notes (e.g. the controller had to change)."""
+        with self.lock:
+            if self.status == "running":
+                raise ValidationError("Pause the simulation before changing the robot")
+            try:
+                prof = R.get_profile(robot_id, custom)
+            except R.RobotError as e:
+                raise ValidationError(str(e)) from None
+            w, r = self.base_world, prof["radius"]
+            fits = all(0 < x - r and x + r < w.width and 0 < y - r and y + r < w.height and not w.collides(x, y, r + 0.02)
+                       for x, y in (w.start[:2], w.goal))
+            if not fits and not regenerate:
+                raise RobotFitError(f"The {prof['name']}'s {r:.2f} m footprint does not fit the current map's start or goal. "
+                                    "Generate a new map for it, or move the start/goal in the 2D editor first.")
+            old = (self.robot, dict(self.config), self.policy_key)
+            notes = []
+            self.robot = prof
+            self.config["max_linear"], self.config["max_angular"] = prof["max_linear"], prof["max_angular"]
+            if self.policy_compat(self.policy_key)["status"] == "incompatible":
+                notes.append(f"{POLICIES[self.policy_key]} cannot drive the {prof['name']} (different action space) - "
+                             f"switched the controller to {POLICIES['astar']}.")
+                self.policy_key = "astar"
+            try:
+                if fits:
+                    self.cfg = self._cfg()
+                    self.env = NavigationEnv(self.cfg, mode="eval", use_safety=True)
+                    self._use_model_observation()
+                    self.world_version += 1
+                    self._reset_episode()
+                else:
+                    self.config["seed"] = int(self.config["seed"]) + 1
+                    self._build_world(self.config["seed"])
+                    notes.append(f"Generated a new map (seed {self.config['seed']}) that fits the {r:.2f} m footprint.")
+            except Exception:
+                self.robot, self.config, self.policy_key = old
+                self._build_world(self.config["seed"])
+                raise
+            self.events.emit("info", "robot", f"Robot selected: {prof['name']} ({prof['kind']})")
+            for n in notes:
+                self.events.emit("warning", "robot", n)
+            if self.on_robot_change:
+                try:
+                    self.on_robot_change({"id": prof["id"], "custom": prof.get("custom")})
+                except Exception as e:
+                    self.events.emit("warning", "robot", f"Could not save the robot selection: {e}")
+            return notes
+
+    def robot_state(self):
+        with self.lock:
+            return {"selected": R.public(self.robot),
+                    "compatibility": {k: self.policy_compat(k) for k in POLICIES},
+                    "speed_limits": {"max_linear": self.config["max_linear"], "max_angular": self.config["max_angular"]}}
+
     def _free(self, x, y, margin=0.05, world=None):
         w = world or self.base_world
         return 0 < x < w.width and 0 < y < w.height and not w.collides(x, y, self.cfg.robot.radius + margin)
@@ -442,6 +517,8 @@ class SimSession:
             return {
                 "status": self.status, "episode": self.episode, "outcome": self.outcome,
                 "policy": self.policy_key, "policies": POLICIES, "shield": self.shield, "speed": self.speed,
+                "robot_profile": R.public(self.robot),
+                "policy_compat": {k: self.policy_compat(k) for k in POLICIES},
                 "config": dict(self.config), "world_version": self.world_version,
                 "world": {"width": world.width, "height": world.height, "rects": world.rects.round(4).tolist(),
                           "movers": world.movers[:, :2].round(4).tolist(), "mover_radius": world.mover_radius,

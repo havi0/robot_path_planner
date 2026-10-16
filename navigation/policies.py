@@ -92,6 +92,13 @@ class RecoveryWrapper(Policy):
         return self.inner.act(observation, pose, goal)
 
 
+def path_follower(action_space, name):
+    """Path follower matching the robot's action set (holonomic robots translate toward waypoints)."""
+    if "strafe_left" in action_space.names:
+        return HolonomicPathFollowerPolicy(action_space, name)
+    return PathFollowerPolicy(action_space, name)
+
+
 class PathFollowerPolicy(Policy):
     """Follows a waypoint path using the same discrete action set as the RL agent:
     rotate toward a look-ahead point, then drive forward."""
@@ -133,3 +140,27 @@ class PathFollowerPolicy(Policy):
         if err < -self.tol:
             return self.right
         return self.fwd
+
+
+class HolonomicPathFollowerPolicy(PathFollowerPolicy):
+    """Waypoint follower for omnidirectional robots: translates in the action direction
+    closest to the look-ahead point (forward, diagonals, sideways) without turning; only
+    rotates when the target is behind it (there is no reverse action)."""
+
+    DIRS = {"forward": 0.0, "forward_left": math.pi / 4, "forward_right": -math.pi / 4,
+            "strafe_left": math.pi / 2, "strafe_right": -math.pi / 2}
+
+    def __init__(self, action_space, name, **kw):
+        super().__init__(action_space, name, **kw)
+        self.dirs = [(action_space.index_of(n), a) for n, a in self.DIRS.items() if n in action_space.names]
+
+    def act(self, observation, pose, goal):
+        if not self.path:
+            return self.stop
+        while self.idx < len(self.path) - 1 and                 math.hypot(self.path[self.idx][0] - pose.x, self.path[self.idx][1] - pose.y) < self.lookahead:
+            self.idx += 1
+        tx, ty = self.path[self.idx]
+        err = wrap_angle(math.atan2(ty - pose.y, tx - pose.x) - pose.theta)
+        if abs(err) > math.pi / 2 + 0.3:            # target behind: rotate (no reverse action)
+            return self.left if err > 0 else self.right
+        return min(self.dirs, key=lambda d: abs(wrap_angle(err - d[1])))[0]
