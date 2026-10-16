@@ -1,0 +1,30 @@
+{
+ "diff_drive/astar": {
+  "success": 29,
+  "timeout": 1
+ },
+ "diff_drive/dqn_recovery": {
+  "success": 27,
+  "timeout": 3
+ },
+ "skid_steer/astar": {
+  "success": 29,
+  "timeout": 1
+ },
+ "skid_steer/dqn_recovery": {
+  "success": 27,
+  "timeout": 3
+ },
+ "delivery/astar": {
+  "success": 28,
+  "timeout": 2
+ },
+ "delivery/dqn_recovery": {
+  "success": 24,
+  "timeout": 6
+ },
+ "mecanum/astar": {
+  "success": 28,
+  "timeout": 2
+ }
+}

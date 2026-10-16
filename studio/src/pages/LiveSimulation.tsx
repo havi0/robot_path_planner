@@ -6,6 +6,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { SimCanvas, type Tool } from "../components/sim/SimCanvas";
 import { Scene3DView } from "../components/three/Scene3DView";
+import { COMPAT_LABEL } from "../components/workflow/WorkflowSteps";
 import { Button } from "../components/ui/button";
 import { Field, NumberInput, Select, Switch, TextInput } from "../components/ui/controls";
 import { Badge, Kbd, Skeleton, Tooltip } from "../components/ui/feedback";
@@ -154,9 +155,26 @@ export function LiveSimulation() {
               value={sim?.policy ?? "dqn_recovery"}
               disabled={!sim || running || !online}
               onChange={(v) => run(() => api.sim.policy(v), `Policy: ${sim?.policies[v]}`)}
-              options={Object.entries(sim?.policies ?? { dqn_recovery: "DQN + recovery" }).map(([value, label]) => ({ value, label }))}
+              options={Object.entries(sim?.policies ?? { dqn_recovery: "DQN + recovery" }).map(([value, label]) => {
+                const c = sim?.policy_compat?.[value];
+                return { value, label: c?.status === "incompatible" ? `${label} - incompatible with this robot` : c?.status === "unavailable" ? `${label} - no model loaded` : label,
+                  disabled: c?.status === "incompatible" };
+              })}
             />
           </div>
+          {sim?.robot_profile && (
+            <Link to="/robots" className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line-strong px-2.5 text-[12px] text-ink-2 hover:text-ink" title={`${sim.robot_profile.kind} - change robot`}>
+              <span className="h-2 w-2 rounded-full" style={{ background: sim.robot_profile.visual.color }} />{sim.robot_profile.name}
+            </Link>
+          )}
+          {sim?.policy_compat?.[sim.policy] && sim.policy_compat[sim.policy].status !== "planner" && (
+            <Tooltip content={sim.policy_compat[sim.policy].detail} side="bottom">
+              <span className={clsx("inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-[12px]",
+                sim.policy_compat[sim.policy].status === "trained" ? "border-[#3fb95055] text-good" : "border-[#e3b34155] text-warn")} data-learn="policy-compat">
+                {COMPAT_LABEL[sim.policy_compat[sim.policy].status].text}
+              </span>
+            </Tooltip>
+          )}
           <Tooltip content="Safety layer: blocks motion into obstacles and enforces velocity limits" side="bottom">
             <button
               onClick={() => sim && run(() => api.sim.shield(!sim.shield))}
@@ -180,7 +198,7 @@ export function LiveSimulation() {
             <>
               {view === "3d" ? (
                 <>
-                  <Scene3DView variant="studio" world={sim.world} robot={sim.robot} trail={sim.trail} sensor={sim.sensor} plannedPath={sim.planned_path}
+                  <Scene3DView variant="studio" world={sim.world} robot={sim.robot} robotVisual={sim.robot_profile?.visual} trail={sim.trail} sensor={sim.sensor} plannedPath={sim.planned_path}
                     referencePath={sim.reference_path} collisions={sim.collisions} outcome={sim.outcome} active={running}
                     showSensors={prefs.sim.showSensors} showTrail={prefs.sim.showTrail} showReference={prefs.sim.showReference} cameraMode={prefs.sim.camera ?? "orbit"}
                     fallback={<SimCanvas world={sim.world} robot={sim.robot} robotStep={sim.episode * 100000 + sim.telemetry.steps} trail={sim.trail} sensor={sim.sensor}

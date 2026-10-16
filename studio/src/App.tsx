@@ -1,5 +1,5 @@
 import { MotionConfig, motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LearnLayer } from "./components/learn/LearnLayer";
@@ -27,6 +27,8 @@ import { RiskExplorer } from "./pages/RiskExplorer";
 import { ScenarioLab } from "./pages/ScenarioLab";
 import { SettingsPage } from "./pages/Settings";
 import { TrainingLab } from "./pages/TrainingLab";
+
+const RobotsPage = lazy(() => import("./pages/Robots"));   // 3D gallery: loads three.js on demand
 
 function GlobalKeys() {
   const nav = useNavigate();
@@ -140,6 +142,7 @@ export function App() {
               <Route path="risk" element={<RiskExplorer />} />
               <Route path="scenarios" element={<ScenarioLab />} />
               <Route path="planner" element={<PathPlanner />} />
+              <Route path="robots" element={<Suspense fallback={<div className="p-6 text-[13px] text-ink-3">Loading robots...</div>}><RobotsPage /></Suspense>} />
               <Route path="hardware" element={<HardwareBridge />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

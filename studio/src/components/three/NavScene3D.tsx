@@ -11,13 +11,16 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { Outcome, RobotPose, SensorState, Vec2, WorldState } from "../../lib/types";
+import type { Outcome, RobotPose, RobotVisual, SensorState, Vec2, WorldState } from "../../lib/types";
+import { bodyHeight, RobotBody, SwapIn } from "./robotModels";
 
 export type CameraMode = "orbit" | "top" | "follow";
 
 export interface NavScene3DProps {
   world: WorldState;
   robot?: RobotPose | null;
+  /** Visual of the selected robot (from the live snapshot); defaults to the reference robot. */
+  robotVisual?: RobotVisual | null;
   trail?: Vec2[];
   sensor?: SensorState | null;
   plannedPath?: Vec2[];
@@ -51,6 +54,8 @@ const C = {
   amber: "#e3b341",
   orange: "#ec835a",
 };
+
+const DEFAULT_VISUAL: RobotVisual = { model: "scout", color: "#eceef4", length: 0.3, width: 0.3, height: 0.14 };
 
 // ------------------------------------------------------------------ helpers
 type Frame = { W: number; H: number };
@@ -342,12 +347,11 @@ function Route({ f, points, color, animate }: { f: Frame; points: Vec2[]; color:
 }
 
 // ------------------------------------------------------------------ robot
-function Robot({ f, pose, radius, collided, active, sensor, showSensors, animate, poseRef }: {
-  f: Frame; pose: RobotPose; radius: number; collided: boolean; active: boolean; sensor?: SensorState | null; showSensors: boolean; animate: boolean;
+function Robot({ f, pose, radius, visual, collided, active, sensor, showSensors, animate, poseRef }: {
+  f: Frame; pose: RobotPose; radius: number; visual: RobotVisual; collided: boolean; active: boolean; sensor?: SensorState | null; showSensors: boolean; animate: boolean;
   poseRef: React.MutableRefObject<THREE.Vector3>;
 }) {
   const g = useRef<THREE.Group>(null);
-  const lidar = useRef<THREE.Mesh>(null);
   const target = useMemo(() => v3(f, pose.x, pose.y), [f, pose.x, pose.y]);
   const yaw = pose.theta;
   const first = useRef(true);
@@ -365,17 +369,17 @@ function Robot({ f, pose, radius, collided, active, sensor, showSensors, animate
     }
     o.position.y = animate && !active ? 0.006 * Math.sin(clock.elapsedTime * 2) + 0.006 : 0;
     poseRef.current.copy(o.position);
-    if (lidar.current && animate) lidar.current.rotation.y += dt * (active ? 9 : 2);
   });
 
+  const beamY = bodyHeight(visual);
   const beams = useMemo(() => {
     if (!sensor || !showSensors) return null;
     const pos: number[] = [], hits: number[] = [];
     sensor.angles.forEach((a, i) => {
       const r = sensor.ranges[i] ?? sensor.max_range;
       const x = Math.cos(a) * r, z = -Math.sin(a) * r;
-      pos.push(0, 0.13, 0, x, 0.13, z);
-      if (sensor.ranges[i] !== null && r < sensor.max_range - 1e-3) hits.push(x, 0.13, z);
+      pos.push(0, beamY, 0, x, beamY, z);
+      if (sensor.ranges[i] !== null && r < sensor.max_range - 1e-3) hits.push(x, beamY, z);
     });
     const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
     const hg = new THREE.BufferGeometry(); hg.setAttribute("position", new THREE.Float32BufferAttribute(hits, 3));
@@ -383,11 +387,10 @@ function Robot({ f, pose, radius, collided, active, sensor, showSensors, animate
       lines: new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: C.violet, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending })),
       pts: new THREE.Points(hg, new THREE.PointsMaterial({ color: C.lavender, size: 0.05, map: dot(), transparent: true, opacity: 0.95, depthWrite: false, alphaTest: 0.02 })),
     };
-  }, [sensor, showSensors]);
+  }, [sensor, showSensors, beamY]);
   useEffect(() => () => { if (beams) { [beams.lines, beams.pts].forEach((o) => { o.geometry.dispose(); (o.material as THREE.Material).dispose(); }); } }, [beams]);
 
   const R = radius;
-  const shell = collided ? C.bad : "#eceef4";
   return (
     <group ref={g}>
       {/* soft violet halo so the robot reads at a glance (UI cue, not part of the footprint) */}
@@ -395,48 +398,18 @@ function Robot({ f, pose, radius, collided, active, sensor, showSensors, animate
         <circleGeometry args={[R * 2.1, 48]} />
         <meshBasicMaterial color={collided ? C.bad : C.violet} transparent opacity={active ? 0.2 : 0.12} depthWrite={false} blending={THREE.AdditiveBlending} />
       </mesh>
-      {/* contact shadow */}
+      {/* collision footprint (what the simulator actually checks) */}
+      <mesh rotation-x={-Math.PI / 2} position-y={0.0035}>
+        <ringGeometry args={[R - 0.004, R, 64]} />
+        <meshBasicMaterial color={C.lavender} transparent opacity={0.35} depthWrite={false} />
+      </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.003}>
-        <circleGeometry args={[R * 1.12, 40]} />
+        <circleGeometry args={[R * 1.05, 40]} />
         <meshBasicMaterial color="#000" transparent opacity={0.45} depthWrite={false} />
       </mesh>
-      <mesh position-y={0.024} castShadow>
-        <cylinderGeometry args={[R, R, 0.026, 48]} />
-        <meshStandardMaterial color="#191c24" metalness={0.5} roughness={0.45} />
-      </mesh>
-      <mesh position-y={0.068} castShadow>
-        <cylinderGeometry args={[R * 0.97, R, 0.064, 48]} />
-        <meshPhysicalMaterial color={shell} roughness={0.3} metalness={0.05} clearcoat={1} clearcoatRoughness={0.18} emissive={collided ? C.bad : "#000"} emissiveIntensity={collided ? 0.6 : 0} />
-      </mesh>
-      <mesh position-y={0.101} rotation-x={Math.PI / 2}>
-        <torusGeometry args={[R * 0.97, 0.0055, 10, 64]} />
-        <meshStandardMaterial color={C.violet} emissive={C.violet} emissiveIntensity={active ? 3 : 1.6} />
-      </mesh>
-      <mesh position-y={0.103}>
-        <cylinderGeometry args={[R * 0.5, R * 0.56, 0.01, 40]} />
-        <meshPhysicalMaterial color="#1b1d26" metalness={0.4} roughness={0.15} clearcoat={1} />
-      </mesh>
-      {/* LiDAR */}
-      <mesh position-y={0.125} castShadow>
-        <cylinderGeometry args={[0.042, 0.048, 0.04, 32]} />
-        <meshStandardMaterial color="#14161c" metalness={0.8} roughness={0.25} />
-      </mesh>
-      <mesh ref={lidar} position-y={0.13}>
-        <torusGeometry args={[0.045, 0.004, 8, 40, Math.PI * 1.4]} />
-        <meshStandardMaterial color={C.cyan} emissive={C.cyan} emissiveIntensity={2.5} />
-      </mesh>
-      {/* wheels */}
-      {[1, -1].map((s) => (
-        <mesh key={s} position={[0, 0.042, s * R * 0.93]} rotation-x={Math.PI / 2} castShadow>
-          <cylinderGeometry args={[0.042, 0.042, 0.024, 28]} />
-          <meshStandardMaterial color="#0e0f13" roughness={0.9} />
-        </mesh>
-      ))}
-      {/* front sensor window (robot heading = local +x) */}
-      <mesh position={[R * 0.95, 0.07, 0]}>
-        <boxGeometry args={[0.012, 0.016, 0.07]} />
-        <meshStandardMaterial color={C.blue} emissive={C.blue} emissiveIntensity={2.6} />
-      </mesh>
+      <SwapIn k={`${visual.model}-${visual.color}-${visual.body ?? ""}-${R}`} animate={animate}>
+        <RobotBody visual={visual} radius={R} active={active} collided={collided} spin={animate} />
+      </SwapIn>
       {active && <pointLight color={C.violet} intensity={0.8} distance={1.2} position-y={0.3} />}
       {beams && <primitive object={beams.lines} />}
       {beams && <primitive object={beams.pts} />}
@@ -579,7 +552,7 @@ function Scene(p: NavScene3DProps & { animate: boolean }) {
       )}
       {p.collisions && <CollisionMarks f={f} points={p.collisions} />}
       {p.robot && (
-        <Robot f={f} pose={p.robot} radius={p.world.robot_radius} collided={!!p.robot.collided || p.outcome === "collision"} active={!!p.active}
+        <Robot f={f} pose={p.robot} radius={p.world.robot_radius} visual={p.robotVisual ?? DEFAULT_VISUAL} collided={!!p.robot.collided || p.outcome === "collision"} active={!!p.active}
           sensor={p.sensor} showSensors={p.showSensors !== false} animate={p.animate} poseRef={robotPos} />
       )}
       <Dust f={f} animate={p.animate} count={p.variant === "hero" ? 200 : 110} />

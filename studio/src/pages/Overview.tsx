@@ -1,11 +1,12 @@
 import clsx from "clsx";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Activity, AlertTriangle, ArrowRight, ArrowUpRight, Bot, Boxes, CheckCircle2, CircleDot, Cpu, FlaskConical, Info, ListVideo, Map as MapIcon, Play, Rocket, Route, ShieldCheck, Shuffle, XCircle, Zap } from "lucide-react";
+import { Activity, AlertTriangle, ArrowRight, ArrowUpRight, Bot, Boxes, CheckCircle2, CircleDot, Cpu, FlaskConical, Info, ListVideo, Map as MapIcon, Play, Rocket, Route, Shapes, ShieldCheck, Shuffle, XCircle, Zap } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SimCanvas } from "../components/sim/SimCanvas";
 import { Scene3DView } from "../components/three/Scene3DView";
 import { useTilt } from "../components/ui/tilt";
+import { WorkflowSteps } from "../components/workflow/WorkflowSteps";
 import { Button } from "../components/ui/button";
 import { Collapsible } from "../components/ui/collapsible";
 import { Badge, EmptyState, StatusDot } from "../components/ui/feedback";
@@ -42,6 +43,13 @@ export function Overview() {
   const models = useLive((s) => s.models);
   const hardware = useLive((s) => s.hardware);
   const { uiMode, reduceMotion } = usePrefs();
+  const [leaving, setLeaving] = useState(false);
+  /** Cinematic hand-off to the simulator: the scene pushes in, then the route changes (instant with reduced motion). */
+  const launch = () => {
+    if (reduceMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { nav("/simulation"); return; }
+    setLeaving(true);
+    window.setTimeout(() => nav("/simulation"), 420);
+  };
   const beginner = uiMode === "beginner";
   const [experiments, setExperiments] = useState<Experiment[] | null>(null);
   const lastEvalSeq = events.filter((e) => e.category === "evaluation" || e.category === "training").slice(-1)[0]?.seq ?? 0;
@@ -53,6 +61,7 @@ export function Overview() {
   const online = connection === "online";
   const navOnline = online && !!sim && !!models?.dqn;
   const running = training?.status === "running" || training?.status === "paused";
+  const robotUntrainable = sim?.robot_profile ? !sim.robot_profile.training : false;
 
   const trend = useMemo(() => {
     if (episodes.length < 100) return null;
@@ -85,8 +94,8 @@ export function Overview() {
 
   return (
     <div className="space-y-5 p-4">
-      <Hero reduceMotion={reduceMotion} scene={sim ? (
-          <Scene3DView variant="hero" world={sim.world} robot={sim.robot} trail={sim.trail} sensor={sim.sensor} plannedPath={sim.planned_path}
+      <Hero reduceMotion={reduceMotion} leaving={leaving} scene={sim ? (
+          <Scene3DView variant="hero" world={sim.world} robot={sim.robot} robotVisual={sim.robot_profile?.visual} trail={sim.trail} sensor={sim.sensor} plannedPath={sim.planned_path}
             referencePath={sim.reference_path} routeFromReference collisions={sim.collisions} outcome={sim.outcome} active={sim.status === "running"}
             fallback={<div className="absolute inset-y-0 right-0 w-full lg:w-[55%]"><SimCanvas world={sim.world} robot={sim.robot} trail={sim.trail} sensor={sim.sensor} collisions={sim.collisions} outcome={sim.outcome}
               compact active={sim.status === "running"} options={{ grid: true, trail: true, sensors: true }} /></div>} />
@@ -98,7 +107,7 @@ export function Overview() {
         {sim && (
           <div className="pointer-events-none absolute bottom-5 right-5 z-10 flex items-center gap-2.5 rounded-xl border border-white/[0.07] bg-[#0d0e13]/70 px-3 py-2 backdrop-blur-md">
             <Badge tone={sim.status === "running" ? "violet" : "muted"} pulse={sim.status === "running"}>Live · {sim.status}</Badge>
-            <span className="text-[11.5px] text-ink-2">{sim.policies[sim.policy]} · episode <span className="mono">{sim.episode}</span></span>
+            <span className="text-[11.5px] text-ink-2">{sim.robot_profile ? <><span className="text-ink">{sim.robot_profile.name}</span> · </> : null}{sim.policies[sim.policy]} · episode <span className="mono">{sim.episode}</span></span>
             {sim.reference_path.length > 1 && !sim.planned_path.length && <span className="hidden text-[11px] text-ink-3 md:inline">· blue route = A* reference</span>}
           </div>
         )}
@@ -110,23 +119,34 @@ export function Overview() {
               <><StatusDot tone={online ? "warn" : "bad"} /><span className="text-ink-2">{online ? "Backend online · no navigation policy loaded" : "Backend offline · start it with python main.py studio"}</span></>
             )}
           </div>
-          <div className="mono mb-3 text-[11px] tracking-[0.22em] text-[#b3a9ff]">WELCOME TO NEXUS</div>
-          <motion.h1 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-            className="text-[44px] font-semibold leading-[1.02] tracking-[-0.035em] text-ink md:text-[60px]">
-            Teach robots<br /><span className="bg-gradient-to-r from-[#e9e5ff] via-[#b9afff] to-[#7fb2ff] bg-clip-text text-transparent">to navigate.</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.08, ease: [0.2, 0.8, 0.2, 1] }}
-            className="mt-5 max-w-[440px] text-[15px] leading-relaxed text-ink-2">
-            Train a simulated robot to reach goals without hitting obstacles using reinforcement learning, then measure how reliably it navigates.
+          <div className="mono mb-4 text-[11px] tracking-[0.22em] text-[#b3a9ff]">WELCOME TO NEXUS</div>
+          <h1 className="text-[46px] font-semibold leading-[0.98] tracking-[-0.04em] text-ink md:text-[66px]" aria-label="Teach robots to navigate.">
+            {["Teach robots", "to navigate."].map((line, i) => (
+              <span key={line} className="block overflow-hidden pb-1" aria-hidden>
+                <motion.span className={clsx("block", i === 1 && "bg-gradient-to-r from-[#efecff] via-[#b9afff] to-[#7fb2ff] bg-clip-text text-transparent")}
+                  initial={{ y: "105%" }} animate={{ y: 0 }} transition={{ duration: 0.85, delay: 0.1 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}>
+                  {line}
+                </motion.span>
+              </span>
+            ))}
+          </h1>
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.38, ease: [0.2, 0.8, 0.2, 1] }}
+            className="mt-6 max-w-[450px] text-[15px] leading-relaxed text-ink-2">
+            Reinforcement learning lets a robot learn by trial and error - rewarded for reaching goals, penalised for collisions.
+            Pick a robot, train its policy and watch it navigate on its own.
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-            className="mt-8 flex flex-wrap gap-3">
-            <Button variant="primary" size="lg" className="h-11 px-5" onClick={() => nav("/simulation")} icon={<Play className="h-4 w-4" />}>Launch Simulation</Button>
-            <Button variant="secondary" size="lg" className="h-11 px-5" onClick={() => nav("/training")} icon={<Activity className="h-4 w-4" />}>Open Training Lab</Button>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+            className="mt-8 flex flex-wrap items-center gap-3">
+            <Button variant="primary" size="lg" className="h-12 px-6 text-[15px] transition-transform hover:-translate-y-0.5" onClick={launch} icon={<Play className="h-4 w-4" />}>Launch Simulation</Button>
+            <Button variant="secondary" size="lg" className="h-12 px-5" onClick={() => nav("/robots")} icon={<Shapes className="h-4 w-4" />}>Explore Robots</Button>
+            <button onClick={() => nav("/training")} className="group ml-1 inline-flex items-center gap-1.5 text-[13px] text-ink-2 hover:text-ink">
+              Open Training Lab <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </button>
           </motion.div>
-          <div className="mono mt-10 flex flex-wrap gap-x-5 gap-y-1 text-[10.5px] tracking-[0.12em] text-ink-3">
-            <span>DEEP Q-NETWORK</span><span>24-BEAM LIDAR</span><span>DIFF-DRIVE</span><span>SAFETY LAYER</span>
-          </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.7 }}
+            className="mono mt-10 flex flex-wrap gap-x-4 gap-y-1 text-[10.5px] tracking-[0.12em] text-ink-3">
+            <span>DOUBLE DQN</span><span>Q-LEARNING</span><span>A* / DIJKSTRA</span><span>24-BEAM LIDAR</span><span>SAFETY SHIELD</span><span>ROS 2 BRIDGE</span>
+          </motion.div>
         </div>
       </Hero>
 
@@ -159,7 +179,15 @@ export function Overview() {
         </div>
       </Reveal>
 
-      {beginner && <Reveal><GettingStarted /></Reveal>}
+      {beginner && (
+        <Reveal className="panel p-4">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h2 className="text-[14px] font-semibold text-ink">Your workflow</h2>
+            <span className="text-[11.5px] text-ink-3">Each step shows live status · hover a label for an explanation · switch to Advanced for every setting</span>
+          </div>
+          <WorkflowSteps />
+        </Reveal>
+      )}
 
       <Reveal className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         {/* -------- activity -------- */}
@@ -188,8 +216,12 @@ export function Overview() {
           <Panel title="Quick launch" eyebrow="Predefined experiments" dense>
             <div className="space-y-2.5">
               {PRESETS.map((p) => (
-                <LaunchTile key={p.label} label={p.label} desc={p.desc} disabled={!online || running}
-                  onClick={async () => { const r = await run(() => api.training.start(p.req), `${p.label} started`); if (r) nav("/training"); }} />
+                <LaunchTile key={p.label} label={p.label} desc={p.desc} disabled={!online || running || robotUntrainable}
+                  onClick={async () => {
+                    const robot = sim?.robot_profile;
+                    const req = robot && !robot.reference ? { ...p.req, robot: { id: robot.id, custom: robot.custom } } : p.req;
+                    const r = await run(() => api.training.start(req), `${p.label} started`); if (r) nav("/training");
+                  }} />
               ))}
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <Button variant="outline" size="md" onClick={() => nav("/experiments")} icon={<FlaskConical className="h-3.5 w-3.5" />}>Open checkpoint</Button>
@@ -197,6 +229,8 @@ export function Overview() {
                   onClick={async () => { await run(() => api.sim.control("regenerate")); nav("/simulation"); }} icon={<Shuffle className="h-3.5 w-3.5" />}>New simulation</Button>
               </div>
               {running && <div className="text-[11.5px] text-ink-3">A training run is active - stop it to launch another.</div>}
+              {robotUntrainable && <div className="text-[11.5px] text-warn">Training is not available for the selected {sim?.robot_profile?.name}. Choose a trainable robot on the Robots page.</div>}
+              {sim?.robot_profile && !sim.robot_profile.reference && !robotUntrainable && <div className="text-[11.5px] text-ink-3">Presets train for the selected {sim.robot_profile.name}.</div>}
             </div>
           </Panel>
 
@@ -227,38 +261,6 @@ export function Overview() {
   );
 }
 
-/** Beginner mode: the three-step path through the studio. Navigation links only — starts nothing by itself. */
-function GettingStarted() {
-  const nav = useNavigate();
-  const steps = [
-    { n: 1, icon: Play, title: "Watch the robot drive", text: "Open Live Simulation and press Start. The trained policy steers using its LiDAR; the safety layer blocks unsafe moves.", to: "/simulation", cta: "Launch Simulation" },
-    { n: 2, icon: Activity, title: "Train a policy", text: "In the Training Lab choose Deep Q-Network and press Start training. Watch the success rate as it learns.", to: "/training", cta: "Open Training Lab" },
-    { n: 3, icon: ShieldCheck, title: "Check reliability", text: "See how often the policy reaches the goal or collides on maps it has never seen, with 95% confidence intervals.", to: "/reliability", cta: "Open Reliability" },
-  ];
-  return (
-    <section className="panel p-4" aria-label="Getting started">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h2 className="text-[14px] font-semibold text-ink">Getting started</h2>
-        <span className="text-[11.5px] text-ink-3">Hover a label for an explanation · switch to Advanced in the top bar to see every setting</span>
-      </div>
-      <ol className="grid gap-3 md:grid-cols-3">
-        {steps.map((s) => (
-          <li key={s.n} className="flex flex-col rounded-lg bg-surface-2 p-3.5">
-            <div className="flex items-center gap-2">
-              <span className="mono flex h-6 w-6 items-center justify-center rounded-full bg-violet-soft text-[11.5px] text-[#c4bcff]">{s.n}</span>
-              <span className="text-[13px] font-medium text-ink">{s.title}</span>
-            </div>
-            <p className="mt-2 flex-1 text-[12.5px] leading-relaxed text-ink-2">{s.text}</p>
-            <button onClick={() => nav(s.to)} className="mt-3 inline-flex items-center gap-1.5 self-start rounded-md text-[12.5px] font-medium text-[#c4bcff] hover:text-ink">
-              <s.icon className="h-3.5 w-3.5" /> {s.cta} <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
 const DEEPER: { to: string; title: string; text: string; icon: typeof Info }[] = [
   { to: "/reliability", title: "Reliability", text: "Validation verdict, outcome rates with 95% intervals and collision causes.", icon: ShieldCheck },
   { to: "/episodes", title: "Episodes & Behaviour", text: "Replay any episode step by step and branch a what-if counterfactual.", icon: ListVideo },
@@ -267,7 +269,7 @@ const DEEPER: { to: string; title: string; text: string; icon: typeof Info }[] =
 ];
 
 /** Full-bleed hero: live 3D scene behind, headline in front, scroll parallax (off with reduced motion). */
-function Hero({ scene, children, reduceMotion }: { scene: ReactNode; children: ReactNode; reduceMotion: boolean }) {
+function Hero({ scene, children, reduceMotion, leaving }: { scene: ReactNode; children: ReactNode; reduceMotion: boolean; leaving: boolean }) {
   const main = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => { main.current = document.querySelector("main"); }, []);
   const { scrollY } = useScroll({ container: main });
@@ -276,12 +278,15 @@ function Hero({ scene, children, reduceMotion }: { scene: ReactNode; children: R
   return (
     <section className="hero-shell relative h-[560px] overflow-hidden rounded-[20px] md:h-[600px]" aria-label="NEXUS overview">
       <motion.div className="absolute inset-0" style={{ y: sceneY, opacity: fade }}>
-        {scene}
+        <motion.div className="absolute inset-0" animate={leaving ? { scale: 1.12, x: "-6%" } : { scale: 1, x: 0 }} transition={{ duration: 0.42, ease: [0.6, 0, 0.4, 1] }}>
+          {scene}
+        </motion.div>
       </motion.div>
       {/* legibility veil: obsidian on the text side, open on the scene side */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,#0a0b0fF2_0%,#0a0b0fCC_30%,#0a0b0f33_58%,transparent_75%)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0a0b0f] to-transparent" />
-      {children}
+      <motion.div className="relative h-full" animate={leaving ? { opacity: 0, x: -24 } : { opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>{children}</motion.div>
+      <motion.div className="pointer-events-none absolute inset-0 bg-[#0a0b0f]" initial={false} animate={{ opacity: leaving ? 0.85 : 0 }} transition={{ duration: 0.42 }} />
     </section>
   );
 }

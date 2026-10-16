@@ -10,6 +10,7 @@ import { setUi } from "../../lib/ui-store";
 import { JobsTray } from "../workflow/JobsTray";
 import { LearnButton } from "../learn/LearnLayer";
 import { ModeSwitch } from "./ModeSwitch";
+import { RobotChip } from "../workflow/WorkflowSteps";
 import { NAV } from "./Sidebar";
 
 export function TopBar() {
@@ -34,7 +35,7 @@ export function TopBar() {
         <ChevronRight className="h-3.5 w-3.5 text-ink-3" />
         <span className="truncate font-medium text-ink">{page?.label ?? "Studio"}</span>
         <button onClick={() => setUi({ paletteOpen: true })} className="ml-3 hidden items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-2.5 py-1 text-[11.5px] text-ink-3 hover:text-ink-2 md:inline-flex" aria-label="Open command palette">
-          <Command className="h-3.5 w-3.5" /> Search & commands <span className="mono rounded border border-line-strong px-1 text-[10px]">Ctrl K</span>
+          <Command className="h-3.5 w-3.5" /> <span className="hidden min-[1760px]:inline">Search & commands</span> <span className="mono rounded border border-line-strong px-1 text-[10px]">Ctrl K</span>
         </button>
       </div>
 
@@ -45,12 +46,13 @@ export function TopBar() {
             <span className="mono max-w-[220px] truncate">{training.experiment_id}</span>
           </Link>
         )}
+        <RobotChip />
         <JobsTray />
         <button onClick={() => setUi({ copilotOpen: true })} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#8b7cf640] bg-violet-soft px-2.5 text-[12px] text-[#c4bcff] hover:border-[#8b7cf680]" aria-label="Open research copilot" title="Research Copilot (Ctrl J)">
           <Bot className="h-3.5 w-3.5" /> Copilot
         </button>
-        <Badge tone={tTone} pulse={tStatus === "running"} className="hidden xl:inline-flex">Training · {tStatus}</Badge>
-        <Badge tone={connection === "online" ? "good" : connection === "connecting" ? "warn" : "bad"} pulse={connection === "online"} className="hidden lg:inline-flex">
+        <Badge tone={tTone} pulse={tStatus === "running"} className="hidden whitespace-nowrap min-[1760px]:inline-flex">Training · {tStatus}</Badge>
+        <Badge tone={connection === "online" ? "good" : connection === "connecting" ? "warn" : "bad"} pulse={connection === "online"} className="hidden whitespace-nowrap xl:inline-flex">
           Backend {connection}
         </Badge>
 

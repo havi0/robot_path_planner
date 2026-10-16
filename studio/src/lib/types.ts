@@ -44,8 +44,66 @@ export interface SimConfig {
   max_angular: number;
 }
 
+export interface RobotVisual {
+  model: "scout" | "hauler" | "glide" | "courier" | "custom";
+  color: string;
+  length: number;
+  width: number;
+  height: number;
+  body?: "round" | "box";
+}
+
+export interface CustomRobot {
+  drive: "differential" | "skid_steer";
+  radius: number;
+  max_linear: number;
+  max_angular: number;
+  name: string;
+  visual: { color: string; body: "round" | "box"; height: number };
+}
+
+/** Mirrors navigation/robots.py public(). */
+export interface RobotProfile {
+  id: string;
+  name: string;
+  kind: string;
+  tagline: string;
+  description: string;
+  drive: "differential" | "skid_steer" | "mecanum";
+  kinematics: "diff_drive" | "skid_steer" | "holonomic";
+  action_set: "unicycle4" | "holonomic8";
+  radius: number;
+  max_linear: number;
+  max_angular: number;
+  visual: RobotVisual;
+  capabilities: string[];
+  limitations: string[];
+  training: boolean;
+  training_note?: string;
+  sensor: { num_beams: number; fov_deg: number; max_range: number };
+  kinematics_params?: { yaw_efficiency?: number };
+  actions: string[];
+  reference: boolean;
+  custom?: CustomRobot;
+}
+
+export type CompatStatus = "trained" | "unvalidated" | "incompatible" | "planner" | "unavailable";
+export interface PolicyCompat { status: CompatStatus; ok: boolean; detail: string }
+
+export interface RobotState {
+  robots: RobotProfile[];
+  selected: RobotProfile;
+  compatibility: Record<string, PolicyCompat>;
+  preview: Record<string, Record<string, PolicyCompat>>;
+  policy_names: Record<string, string>;
+  speed_limits: { max_linear: number; max_angular: number };
+  notes?: string[];
+}
+
 export interface SimSnapshot {
   status: SimStatus;
+  robot_profile?: RobotProfile;
+  policy_compat?: Record<string, PolicyCompat>;
   episode: number;
   outcome: Outcome;
   policy: string;

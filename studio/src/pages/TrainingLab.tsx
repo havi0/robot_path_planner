@@ -19,7 +19,7 @@ import type { EpisodeMetric, Experiment, TrainingPreview, TrainingSummary } from
 
 const S1 = "#9085e9", S2 = "#d95926", S3 = "#199e70";
 
-type Form = Required<Omit<TrainRequest, "alpha" | "curriculum">> & { alpha: number };
+type Form = Required<Omit<TrainRequest, "alpha" | "curriculum" | "robot">> & { alpha: number };
 interface Cur { enabled: boolean; types: string[]; threshold: number; window: number; min_episodes: number }
 
 function defaults(prefs: ReturnType<typeof usePrefs>): Form {
@@ -44,6 +44,7 @@ export function TrainingLab() {
   const training = useLive((s) => s.training);
   const episodes = useLive((s) => s.episodes);
   const online = useLive((s) => s.connection === "online");
+  const robot = useLive((s) => s.sim?.robot_profile);
   const run = useAction();
   const [form, setForm] = useState<Form>(() => defaults(prefs));
   const [params] = useSearchParams();
@@ -81,10 +82,12 @@ export function TrainingLab() {
   const curErr = cur.enabled && form.algorithm !== "dqn" ? "Curriculum mode needs DQN" : cur.enabled && !cur.types.length ? "Pick at least one scenario type"
     : cur.enabled && (cur.threshold <= 0 || cur.threshold > 1 || cur.window < 5 || cur.min_episodes < cur.window) ? "Curriculum: 0 < threshold ≤ 1, window ≥ 5, min episodes ≥ window" : null;
   const crossErr = form.eps_end > form.eps_start ? "ε end must not exceed ε start" : form.density_min > form.density_max ? "density min must not exceed max" : !form.name.trim() ? "Name the experiment" : curErr;
-  const canStart = online && !active && !Object.values(bad).some(Boolean) && !crossErr;
+  const robotTrainable = robot?.training ?? true;
+  const canStart = online && !active && !Object.values(bad).some(Boolean) && !crossErr && robotTrainable;
 
   const start = async () => {
-    const req: TrainRequest = { ...form, name: form.name.trim(), curriculum: cur.enabled ? cur : undefined };
+    const req: TrainRequest = { ...form, name: form.name.trim(), curriculum: cur.enabled ? cur : undefined,
+      robot: robot && !robot.reference ? { id: robot.id, custom: robot.custom } : undefined };
     if (form.algorithm === "qlearning") {
       delete req.lr; delete req.buffer_size; delete req.batch_size; delete req.target_update; delete req.eval_every;
     } else delete req.alpha;
@@ -99,6 +102,20 @@ export function TrainingLab() {
         {/* -------- configuration -------- */}
         <Panel title="Experiment configuration" eyebrow="Hyperparameters" dense className="self-start">
           <div className="space-y-3">
+            {robot && (
+              <div className={clsx("rounded-lg border px-3 py-2.5", robotTrainable ? "border-line bg-surface-2" : "border-[#e3b34155] bg-[#e3b3410d]")}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[12px] text-ink-3">Training robot</span>
+                  <Link to="/robots" className="text-[11.5px] text-[#c4bcff] hover:text-ink">Change</Link>
+                </div>
+                <div className="mt-0.5 text-[13px] font-medium text-ink">{robot.name} <span className="font-normal text-ink-3">· {robot.kind}</span></div>
+                <div className="mt-1 text-[11.5px] leading-relaxed text-ink-3">
+                  {robotTrainable
+                    ? `${robot.radius.toFixed(2)} m footprint · ${robot.max_linear.toFixed(2)} m/s · ${robot.kinematics.replace("_", " ")} kinematics. The resulting policy is marked as trained for this robot.`
+                    : <span className="text-warn">Training is not available for this robot: {robot.training_note}</span>}
+                </div>
+              </div>
+            )}
             <Field label="Experiment name"><TextInput value={form.name} disabled={active} maxLength={80} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
             <Field label="Algorithm">
               <Segmented value={form.algorithm} onChange={(v) => setForm({ ...form, algorithm: v, name: form.name.replace(/^(DQN|Q-learning)/, v === "dqn" ? "DQN" : "Q-learning"), eps_decay: v === "dqn" ? 100000 : 4000 })}

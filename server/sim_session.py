@@ -441,8 +441,16 @@ class SimSession:
 
     def robot_state(self):
         with self.lock:
+            def preview(prof):
+                out = {}
+                for k in POLICIES:
+                    e = self.models.get("dqn" if k in ("dqn", "dqn_recovery") else "qlearning") if k in R.LEARNED else None
+                    out[k] = R.policy_compatibility(k, prof, e[1] if e else None)
+                return out
             return {"selected": R.public(self.robot),
                     "compatibility": {k: self.policy_compat(k) for k in POLICIES},
+                    "preview": {r["id"]: preview(R.get_profile(r["id"])) for r in R.catalog() if r["id"] != "custom"},
+                    "policy_names": POLICIES,
                     "speed_limits": {"max_linear": self.config["max_linear"], "max_angular": self.config["max_angular"]}}
 
     def _free(self, x, y, margin=0.05, world=None):

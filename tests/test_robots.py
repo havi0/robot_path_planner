@@ -248,3 +248,13 @@ def test_robot_api_and_training_boundary(tmp_path):
     # selection survives a restart
     with TestClient(create_app(data_dir=str(tmp_path), broadcast_hz=5)) as c:
         assert c.get("/api/robots").json()["selected"]["id"] == "mecanum"
+
+
+def test_holonomic_follower_does_not_deadlock_on_large_dense_map(session):
+    """Regression: translating up to 22.5 deg off the path drifted into obstacles and the
+    safety layer blocked the same strafe forever (timeout). The follower now aligns first."""
+    session.apply_config({"width": 12.0, "height": 12.0, "density": 0.25, "seed": 369748})
+    session.select_robot("mecanum", regenerate=True)
+    assert _run(session, 400) == "success"
+    blocked = sum(1 for r in session.rec["safety"] if "proximity_stop" in r)
+    assert blocked < 20

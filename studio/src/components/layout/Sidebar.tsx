@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { Activity, BarChart3, Bot, Boxes, ChevronsLeft, ChevronsRight, Cpu, FlaskConical, Flame, LayoutDashboard, ListVideo, Map, Route, Settings, ShieldCheck, TestTubes } from "lucide-react";
+import { Activity, BarChart3, Bot, Boxes, ChevronsLeft, ChevronsRight, Cpu, FlaskConical, Flame, LayoutDashboard, ListVideo, Map, Route, Settings, Shapes, ShieldCheck, TestTubes } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useLive } from "../../lib/live";
 import { updatePrefs, usePrefs } from "../../lib/prefs";
@@ -19,6 +19,7 @@ export const NAV = [
   { to: "/risk", label: "Risk Explorer", icon: Flame, group: "Analysis" },
   { to: "/scenarios", label: "Scenario Lab", icon: Map, group: "Analysis" },
   { to: "/planner", label: "Path Planner", icon: Route, group: "Analysis" },
+  { to: "/robots", label: "Explore Robots", icon: Shapes, group: "System" },   // after index 8: Alt+1-9 shortcuts unchanged
   { to: "/hardware", label: "Hardware Bridge", icon: Cpu, group: "System" },
   { to: "/settings", label: "Settings", icon: Settings, group: "System" },
 ];

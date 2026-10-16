@@ -12,6 +12,7 @@ safety validation all run on an ordinary computer.
 * Hardware integration + safety procedure: [docs/HARDWARE.md](docs/HARDWARE.md)
 * Web studio architecture, API and dev setup: [docs/STUDIO.md](docs/STUDIO.md)
 * Collision & navigation reliability fix (root causes, measurements): [docs/COLLISION_FIX.md](docs/COLLISION_FIX.md)
+* Robot selection (catalog, kinematics, policy compatibility): [docs/ROBOTS.md](docs/ROBOTS.md)
 * NEXUS 2.0 research features (copilot, scenarios, counterfactuals, risk, designer, registry): [docs/NEXUS2.md](docs/NEXUS2.md)
 * Raw experiment output: [results/RESULTS.md](results/RESULTS.md), [results/safety_validation.md](results/safety_validation.md)
 

@@ -48,7 +48,7 @@ _BASE = {
         "drive": "skid_steer", "kinematics": "skid_steer", "action_set": "unicycle4",
         "radius": 0.20, "max_linear": 0.30, "max_angular": 1.20,
         "kinematics_params": {"yaw_efficiency": 0.8},
-        "visual": {"model": "hauler", "color": "#d7dae3", "length": 0.36, "width": 0.28, "height": 0.16},
+        "visual": {"model": "hauler", "color": "#d7dae3", "length": 0.30, "width": 0.24, "height": 0.15},
         "capabilities": ["Forward motion and in-place rotation (with wheel scrub)", "Larger, sturdier footprint",
                          "Runs learned policies (not trained for it unless you train one) and A*/Dijkstra followers"],
         "limitations": ["No sideways motion", "Turns ~20% slower than commanded (scrub model)",
@@ -63,7 +63,7 @@ _BASE = {
                        "8-action holonomic set (forward, diagonals, strafe left/right, turn, stop) and holonomic kinematics.",
         "drive": "mecanum", "kinematics": "holonomic", "action_set": "holonomic8",
         "radius": 0.18, "max_linear": 0.25, "max_angular": 1.20,
-        "visual": {"model": "glide", "color": "#e4e6ee", "length": 0.32, "width": 0.30, "height": 0.13},
+        "visual": {"model": "glide", "color": "#e4e6ee", "length": 0.26, "width": 0.24, "height": 0.12},
         "capabilities": ["Forward, diagonal and sideways translation", "In-place rotation",
                          "Holonomic A*/Dijkstra path follower (moves toward waypoints without turning)",
                          "Safety layer sweeps the true holonomic path before every move"],
@@ -82,7 +82,7 @@ _BASE = {
                        "scheduling are not implemented.",
         "drive": "differential", "kinematics": "diff_drive", "action_set": "unicycle4",
         "radius": 0.22, "max_linear": 0.22, "max_angular": 1.00,
-        "visual": {"model": "courier", "color": "#f1f2f6", "length": 0.42, "width": 0.40, "height": 0.42},
+        "visual": {"model": "courier", "color": "#f1f2f6", "length": 0.30, "width": 0.30, "height": 0.42},
         "capabilities": ["Forward motion and in-place rotation", "Larger footprint, lower speed limits",
                          "Runs learned policies (not trained for it unless you train one) and A*/Dijkstra followers"],
         "limitations": ["No delivery/payload logic - navigation only", "No sideways motion",
@@ -94,6 +94,8 @@ _BASE = {
 CUSTOM_LIMITS = {"radius": (0.10, 0.30), "max_linear": (0.05, 0.30), "max_angular": (0.30, 1.50)}
 CUSTOM_DRIVES = ("differential", "skid_steer")
 VISUAL_KEYS = ("color", "body", "height")
+# Visual bodies are sized so they stay inside the collision disc (half-diagonal <= radius):
+# what you see is never larger than what the simulator collides with.
 
 
 class RobotError(ValueError):
@@ -156,7 +158,8 @@ def custom_profile(c):
         **vals,
         **({"kinematics_params": {"yaw_efficiency": 0.8}} if skid else {}),
         "visual": {"model": "custom", "color": color, "body": body, "height": round(height, 3),
-                   "length": vals["radius"] * 2, "width": vals["radius"] * 2},
+                   "length": round(vals["radius"] * (2 if body == "round" else 1.38), 3),
+                   "width": round(vals["radius"] * (2 if body == "round" else 1.38), 3)},
         "capabilities": ["Forward motion and in-place rotation"] + (["Skid-steer scrub model (80% yaw efficiency)"] if skid else []),
         "limitations": ["No sideways motion", "Sensor configuration is fixed (24-beam LiDAR, 3 m)"],
         "training": True, "sensor": dict(SENSOR),

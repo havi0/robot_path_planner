@@ -143,9 +143,10 @@ class PathFollowerPolicy(Policy):
 
 
 class HolonomicPathFollowerPolicy(PathFollowerPolicy):
-    """Waypoint follower for omnidirectional robots: translates in the action direction
-    closest to the look-ahead point (forward, diagonals, sideways) without turning; only
-    rotates when the target is behind it (there is no reverse action)."""
+    """Waypoint follower for omnidirectional robots: translates toward the look-ahead point
+    along the closest of its translation directions (forward, diagonals, sideways). It
+    rotates only as much as needed (< 22.5 deg, or more when the target is behind - there is
+    no reverse action) to line one of those directions up with the path."""
 
     DIRS = {"forward": 0.0, "forward_left": math.pi / 4, "forward_right": -math.pi / 4,
             "strafe_left": math.pi / 2, "strafe_right": -math.pi / 2}
@@ -161,6 +162,14 @@ class HolonomicPathFollowerPolicy(PathFollowerPolicy):
             self.idx += 1
         tx, ty = self.path[self.idx]
         err = wrap_angle(math.atan2(ty - pose.y, tx - pose.x) - pose.theta)
-        if abs(err) > math.pi / 2 + 0.3:            # target behind: rotate (no reverse action)
-            return self.left if err > 0 else self.right
-        return min(self.dirs, key=lambda d: abs(wrap_angle(err - d[1])))[0]
+        idx, d = min(self.dirs, key=lambda d: abs(wrap_angle(err - d[1])))
+        resid = wrap_angle(err - d)
+        # The translation directions are 45 deg apart. Translating up to 22.5 deg off the path
+        # drifts toward obstacles (and the safety layer then blocks it indefinitely), so first
+        # rotate until one direction lines up with the path, within the same tolerance the
+        # differential-drive follower uses for its heading.
+        if resid > self.tol:
+            return self.left
+        if resid < -self.tol:
+            return self.right
+        return idx

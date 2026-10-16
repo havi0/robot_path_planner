@@ -74,7 +74,7 @@ export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
 export function Select<T extends string>({ value, onChange, options, disabled }: {
   value: T;
   onChange: (v: T) => void;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; disabled?: boolean }[];
   disabled?: boolean;
 }) {
   return (
@@ -85,7 +85,7 @@ export function Select<T extends string>({ value, onChange, options, disabled }:
       className={clsx(inputCls, "cursor-pointer appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236c7380%22 stroke-width=%222%22><path d=%22m6 9 6 6 6-6%22/></svg>')] bg-[length:12px] bg-[right_8px_center] bg-no-repeat pr-7 font-sans")}
     >
       {options.map((o) => (
-        <option key={o.value} value={o.value} className="bg-surface-2">
+        <option key={o.value} value={o.value} disabled={o.disabled} className="bg-surface-2">
           {o.label}
         </option>
       ))}

@@ -1,5 +1,5 @@
 import { getApiBase } from "./base";
-import type { CompareResponse, EpisodeMetric, Experiment, HardwareSnapshot, ModelInfo, SimConfig, SimSnapshot, TrainingSummary } from "./types";
+import type { CompareResponse, CustomRobot, EpisodeMetric, Experiment, HardwareSnapshot, ModelInfo, RobotState, SimConfig, SimSnapshot, TrainingSummary } from "./types";
 
 export class ApiError extends Error {
   status: number;
@@ -55,9 +55,15 @@ export interface TrainRequest {
   randomization?: boolean;
   eval_every?: number;
   curriculum?: { enabled: boolean; types: string[]; threshold: number; window: number; min_episodes: number };
+  robot?: { id: string; custom?: CustomRobot };
 }
 
 export const api = {
+  robots: {
+    list: () => get<RobotState>("/api/robots"),
+    select: (id: string, custom?: Partial<CustomRobot> | null, regenerate = false) =>
+      post<RobotState>("/api/robots/select", { id, custom: custom ?? undefined, regenerate }),
+  },
   health: () => get<{ status: string; version: string; python: string; torch: string; ros2_available: boolean }>("/api/health"),
   setMode: (mode: "simulation" | "hardware") => post("/api/mode", { mode }),
 
