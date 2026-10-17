@@ -29,6 +29,19 @@ cd studio && npm install && npm run build && cd ..   # one-time frontend build
 python main.py studio                                 # open http://127.0.0.1:8000
 ```
 
+## Desktop app (Windows)
+
+Run once to create **NEXUS Robotics Studio** shortcuts on the Desktop and in the Start Menu:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install_app.ps1
+```
+
+The shortcut runs `app/nexus_app.pyw`: it starts the backend silently (if it is not already
+running), opens the studio in its own app window (Edge/Chrome app mode, no address bar), and
+stops the backend when the window is closed. Logs: `data/logs/app_launcher.log`, `data/logs/app_server.log`.
+Uninstall: delete the two shortcuts.
+
 ## Install
 
 ```bash
