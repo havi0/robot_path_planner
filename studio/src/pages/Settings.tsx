@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Download, RotateCcw, Server } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
@@ -72,6 +73,7 @@ export function SettingsPage() {
             <Field label="Theme"><Segmented value="dark" onChange={() => {}} options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light", disabled: true, title: "Dark is the only theme" }]} /></Field>
             <Switch checked={prefs.reduceMotion} onChange={(v) => updatePrefs((p) => ({ ...p, reduceMotion: v }))} label="Reduce motion" description="Disables interface animations (simulation rendering is unaffected)" />
             <Switch checked={prefs.sidebarCollapsed} onChange={(v) => updatePrefs((p) => ({ ...p, sidebarCollapsed: v }))} label="Collapsed sidebar" />
+            <Link to="/welcome" className="inline-flex text-[12.5px] text-[#c4bcff] hover:text-ink">Show the welcome screen again</Link>
           </div>
         </Panel>
 

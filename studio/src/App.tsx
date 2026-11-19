@@ -11,6 +11,7 @@ import { CommandPalette, SHORTCUTS } from "./components/workflow/CommandPalette"
 import { CopilotPanel } from "./components/workflow/CopilotPanel";
 import { isTypingTarget } from "./lib/format";
 import { useLive } from "./lib/live";
+import { isOnboarded } from "./lib/onboarding";
 import { updatePrefs, usePrefs } from "./lib/prefs";
 import { setUi, useUi } from "./lib/ui-store";
 import { Analytics } from "./pages/Analytics";
@@ -28,7 +29,8 @@ import { ScenarioLab } from "./pages/ScenarioLab";
 import { SettingsPage } from "./pages/Settings";
 import { TrainingLab } from "./pages/TrainingLab";
 
-const RobotsPage = lazy(() => import("./pages/Robots"));   // 3D gallery: loads three.js on demand
+const RobotsPage = lazy(() => import("./pages/Robots"));
+const WelcomePage = lazy(() => import("./pages/Welcome"));   // first-run onboarding (three.js on demand)   // 3D gallery: loads three.js on demand
 
 function GlobalKeys() {
   const nav = useNavigate();
@@ -83,6 +85,10 @@ function ShortcutsDialog() {
 
 function Shell() {
   const loc = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {                       // first launch: show the welcome screen once
+    if (!isOnboarded()) navigate("/welcome", { replace: true });
+  }, [navigate]);
   const connection = useLive((s) => s.connection);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1180px)");
@@ -129,6 +135,7 @@ export function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="welcome" element={<Suspense fallback={<div className="h-full bg-bg" />}><WelcomePage /></Suspense>} />
             <Route element={<Shell />}>
               <Route index element={<Overview />} />
               <Route path="simulation" element={<LiveSimulation />} />
